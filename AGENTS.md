@@ -35,7 +35,24 @@ Prettier: no semicolons, double quotes, 2 spaces, 80 columns, LF, Tailwind class
 - Tailwind is v4 CSS-first: there is no `tailwind.config.*`. Theme tokens, radius, and light/dark colors live in `app/globals.css` (`@theme inline`, `:root`, `.dark`). Add tokens there.
 - shadcn is configured as style `base-vega`, RSC, Lucide, with aliases in `components.json`. Its primitives use `@base-ui/react`, not Radix — props and APIs differ from Radix-based shadcn examples. Add components with `npx shadcn@latest add <name>` and import from `@/components/ui/<name>`.
 - `cn` comes from the `cn` package and is re-exported from `@/lib/utils`; there is no `clsx`/`tailwind-merge`.
-- `next.config.ts` is empty. `next/image` with remote URLs requires adding `images.remotePatterns`; otherwise use files in `public/`.
+- `next.config.ts` configures `images.remotePatterns` with wildcard `**` hostnames for both `http` and `https`, so `next/image` accepts any remote URL (e.g. imgbb). This is development-friendly but should be narrowed to known hosts before production. Prefer files in `public/` when possible.
+
+### Authentication
+
+Better Auth is wired end to end; do not replace it with another auth stack.
+
+- `lib/auth.ts` — server config: MongoDB adapter (`mongodb` + `@better-auth/mongo-adapter`, database `rentalspacedb`), `emailAndPassword`, and the Google social provider. Reads secrets from `.env` only.
+- `lib/auth-client.ts` — browser client created with `createAuthClient({ baseURL: process.env.BETTER_AUTH_URL })`. Non-`NEXT_PUBLIC_` env vars are not inlined into client bundles, so this is normally `undefined` and Better Auth falls back to the page origin. Keep API calls same-origin.
+- `app/api/auth/[...all]/route.ts` — `toNextJsHandler(auth)` exports `GET`/`POST`.
+- Login and signup are intentionally standalone: `app/login/page.tsx` and `app/signup/page.tsx` are self-contained client components with duplicated markup/state. Do not extract shared auth components — the project owner wants login and signup code kept separate.
+- Each auth route has its own `layout.tsx` that exports metadata and guards the route on the server: `auth.api.getSession({ headers: await headers() })` redirects signed-in users to `/`.
+- Forms call Better Auth directly (`signIn.email`, `signUp.email`, `signIn.social` with `provider: "google"` and `callbackURL: "/"`). On success they show a success toast, then `router.push("/")` + `router.refresh()`. On failure they show an error toast with `error.message`.
+- Signup includes an optional `imageUrl` field; it is sent to Better Auth as `image` (the user schema field). Uploads may replace this with imgbb later.
+- Toasts use `components/ui/toast.tsx` (Base UI toast): `<Toaster />` is mounted once in `app/layout.tsx`, and any client component can call `toast.add({ title, description, type: "success" | "error" | ... })`.
+- `components/layout/Navbar.tsx` is a client component using `authClient.useSession()`: skeleton while pending, Profile + Log out when signed in, Log in + Sign up otherwise, and `authClient.signOut()` for logout.
+- Required `.env` keys: `BETTER_AUTH_SECRET`, `BETTER_AUTH_URL`, `MONGODB_URI`, `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`.
+- Google Cloud OAuth redirect URI must be `http://localhost:3000/api/auth/callback/google` (swap host/port for other environments).
+- `/profile` is linked from the navbar but the route does not exist yet.
 
 ## Conventions
 
@@ -49,9 +66,11 @@ Prettier: no semicolons, double quotes, 2 spaces, 80 columns, LF, Tailwind class
 
 ## Current scope
 
-Step 1 is the public homepage only: responsive navbar (logo, dashboard, login/signup and profile/logout UI states, theme toggle), hero with equipment imagery and CTA, feature cards, UI-only newsletter form, and footer. Auth states are UI-only.
+Step 1 is the public homepage: responsive navbar (logo, dashboard, session-aware login/signup and profile/logout states, theme toggle), hero with equipment imagery and CTA, feature cards, UI-only newsletter form, and footer.
 
-Do not add Better Auth/login/signup logic, dashboard pages, equipment CRUD, booking/rental flow, Stripe, admin/vendor pages, or backend APIs until explicitly requested.
+Step 2 adds working authentication: standalone login/signup pages wired to email/password and Google, session-guarded auth routes, success/error toasts, redirect to `/` after auth, and an optional profile image URL on signup.
+
+Do not add dashboard pages, equipment CRUD, booking/rental flow, Stripe, admin/vendor pages, or other backend APIs until explicitly requested.
 
 Rules that matter later: vendor listings need admin approval before appearing publicly; vendors manage only their own equipment and orders; customers manage only their own favorites/bookings/profile; Stripe stays in test mode and secrets stay server-side.
 
@@ -62,6 +81,6 @@ After finishing a step, update the table below, summarize changed files, and wai
 | Step | Task | Status |
 |---|---|---|
 | 1 | Project understanding and homepage | In progress |
-| 2 | To be defined | Pending |
+| 2 | Authentication pages and session flow | In progress |
 | 3 | To be defined | Pending |
 | 4 | To be defined | Pending |

@@ -70,7 +70,7 @@ export function Hero() {
               </div>
             </div>
 
-            <div className="mt-12 flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
+            <div className="mt-12 flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between lg:flex-col lg:items-start xl:flex-row xl:items-end xl:justify-between">
               <div>
                 <p className="text-2xl font-semibold tracking-tight">25,000+</p>
                 <p className="mt-1 max-w-52 text-xs leading-5 text-muted-foreground">
@@ -112,7 +112,7 @@ export function Hero() {
 
           <div className="relative min-h-[480px] overflow-hidden rounded-[2rem] bg-gradient-to-b from-zinc-200 via-zinc-100 to-sky-200 lg:min-h-[650px]">
             <Image
-              src="/images/hero-worker.jpg"
+              src="/images/rentalspace-hero.jpg"
               alt="Construction professional wearing safety gear"
               fill
               priority
@@ -145,18 +145,11 @@ export function Hero() {
                 className="object-cover transition-transform duration-500 group-hover:scale-105"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/10 to-transparent" />
-              <div className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-3 p-5 text-white">
-                <div>
-                  <p className="text-lg font-medium tracking-tight">
-                    {category.title}
-                  </p>
-                  <p className="mt-0.5 text-xs text-white/75">
-                    {category.meta}
-                  </p>
-                </div>
-                <span className="flex size-9 items-center justify-center rounded-full bg-white/15 backdrop-blur transition-colors group-hover:bg-white group-hover:text-black">
-                  <ArrowUpRight className="size-4" aria-hidden="true" />
-                </span>
+              <div className="absolute inset-x-0 bottom-0 p-5 text-white">
+                <p className="text-lg font-medium tracking-tight">
+                  {category.title}
+                </p>
+                <p className="mt-0.5 text-xs text-white/75">{category.meta}</p>
               </div>
             </Link>
           ))}

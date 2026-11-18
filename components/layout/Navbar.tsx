@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import { useTheme } from "next-themes"
 import {
   LayoutDashboard,
@@ -10,32 +11,67 @@ import {
   Menu,
   Moon,
   Sun,
-  User,
   UserPlus,
   Wrench,
   X,
 } from "lucide-react"
 
 import { Button, buttonVariants } from "@/components/ui/button"
+import { authClient } from "@/lib/auth-client"
 import { cn } from "@/lib/utils"
-
-// Replace this with the Better Auth session when authentication is wired up.
-const isLoggedIn = false
+import Image from "next/image"
 
 const navLinks = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
 ]
 
-export function Navbar() {
-  const [menuOpen, setMenuOpen] = useState(false)
-  const { resolvedTheme, setTheme } = useTheme()
+function getInitials(name?: string | null) {
+  if (!name) {
+    return "U"
+  }
 
+  return name
+    .split(" ")
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0])
+    .join("")
+    .toUpperCase()
+}
+
+export function Navbar() {
+  const router = useRouter()
+  const [menuOpen, setMenuOpen] = useState(false)
+  const [signingOut, setSigningOut] = useState(false)
+  const { resolvedTheme, setTheme } = useTheme()
+  const { data: session, isPending } = authClient.useSession()
+  const user = session?.user
+  const initials = getInitials(user?.name)
+  const image = user?.image
   function toggleTheme() {
     setTheme(resolvedTheme === "dark" ? "light" : "dark")
   }
 
   function closeMenu() {
     setMenuOpen(false)
+  }
+
+  async function handleSignOut() {
+    setSigningOut(true)
+
+    try {
+      const { error } = await authClient.signOut()
+
+      if (error) {
+        return
+      }
+
+      closeMenu()
+      router.push("/")
+      router.refresh()
+    } finally {
+      setSigningOut(false)
+    }
   }
 
   return (
@@ -86,7 +122,9 @@ export function Navbar() {
           </Button>
 
           <div className="hidden items-center gap-1.5 md:flex">
-            {isLoggedIn ? (
+            {isPending ? (
+              <div className="h-8 w-40 animate-pulse rounded-full bg-muted" />
+            ) : user ? (
               <>
                 <Link
                   href="/profile"
@@ -94,17 +132,34 @@ export function Navbar() {
                     buttonVariants({ variant: "ghost", size: "sm" }),
                     "gap-2"
                   )}
+                  title={user.name ?? undefined}
                 >
-                  <User className="size-4" aria-hidden="true" />
+                  {image ? (
+                    <Image
+                      src={image}
+                      alt={user.name ?? undefined}
+                      width={32}
+                      height={32}
+                      className="h-8 w-8 rounded-full"
+                    />
+                  ) : (
+                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-muted">
+                      <span className="text-lg font-medium uppercase">
+                        {initials}
+                      </span>
+                    </div>
+                  )}
                   Profile
                 </Link>
                 <Button
                   variant="outline"
                   size="sm"
                   className="gap-2 rounded-full px-4"
+                  onClick={handleSignOut}
+                  disabled={signingOut}
                 >
                   <LogOut className="size-4" aria-hidden="true" />
-                  Log out
+                  {signingOut ? "Signing out..." : "Log out"}
                 </Button>
               </>
             ) : (
@@ -174,7 +229,9 @@ export function Navbar() {
 
             <div className="my-2 h-px bg-border" />
 
-            {isLoggedIn ? (
+            {isPending ? (
+              <div className="h-10 w-full animate-pulse rounded-full bg-muted" />
+            ) : user ? (
               <>
                 <Link
                   href="/profile"
@@ -183,17 +240,22 @@ export function Navbar() {
                     buttonVariants({ variant: "ghost", size: "lg" }),
                     "w-full justify-start gap-2"
                   )}
+                  title={user.name ?? undefined}
                 >
-                  <User className="size-4" aria-hidden="true" />
+                  <span className="flex size-6 items-center justify-center rounded-full bg-muted text-[10px] font-semibold">
+                    {initials}
+                  </span>
                   Profile
                 </Link>
                 <Button
                   variant="outline"
                   size="lg"
                   className="w-full justify-start gap-2 rounded-full"
+                  onClick={handleSignOut}
+                  disabled={signingOut}
                 >
                   <LogOut className="size-4" aria-hidden="true" />
-                  Log out
+                  {signingOut ? "Signing out..." : "Log out"}
                 </Button>
               </>
             ) : (
