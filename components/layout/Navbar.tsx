@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import Link from "next/link"
-import { useRouter } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 import { useTheme } from "next-themes"
 import {
   LayoutDashboard,
@@ -21,13 +21,8 @@ import { Button, buttonVariants } from "@/components/ui/button"
 import { authClient } from "@/lib/auth-client"
 import { cn } from "@/lib/utils"
 import Image from "next/image"
+import { toast } from "../ui/toast"
 
-const navLinks = [
-  { href: "/equipments", label: "All Equipments", icon: WrenchIcon },
-]
-const userNavLinks = [
-  { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-]
 function getInitials(name?: string | null) {
   if (!name) {
     return "U"
@@ -44,6 +39,7 @@ function getInitials(name?: string | null) {
 
 export function Navbar() {
   const router = useRouter()
+  const pathname = usePathname()
   const [menuOpen, setMenuOpen] = useState(false)
   const [signingOut, setSigningOut] = useState(false)
   const { resolvedTheme, setTheme } = useTheme()
@@ -51,6 +47,20 @@ export function Navbar() {
   const user = session?.user
   const initials = getInitials(user?.name)
   const image = user?.image
+  const role = user?.role
+
+  const navLinks = [
+    { href: "/equipments", label: "All Equipments", icon: WrenchIcon },
+  ]
+
+  const userNavLinks = [
+    { href: "/equipments", label: "All Equipments", icon: WrenchIcon },
+    {
+      href: `/dashboard/${role}`,
+      label: "Dashboard",
+      icon: LayoutDashboard,
+    },
+  ]
 
   function toggleTheme() {
     setTheme(resolvedTheme === "dark" ? "light" : "dark")
@@ -62,20 +72,26 @@ export function Navbar() {
 
   async function handleSignOut() {
     setSigningOut(true)
-
     try {
       const { error } = await authClient.signOut()
-
       if (error) {
         return
       }
-
       closeMenu()
       router.push("/")
       router.refresh()
+      toast.add({
+        title: "Signed out",
+        description: "You have been signed out.",
+        type: "success",
+      })
     } finally {
       setSigningOut(false)
     }
+  }
+
+  if (pathname.startsWith("/dashboard")) {
+    return null
   }
 
   return (

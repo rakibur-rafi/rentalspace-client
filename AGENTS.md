@@ -1,6 +1,6 @@
 <!-- BEGIN:nextjs-agent-rules -->
 
-# This is NOT the Next.js you know
+## This is NOT the Next.js you know
 
 This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
 
@@ -55,6 +55,13 @@ Better Auth is wired end to end; do not replace it with another auth stack.
 - Google Cloud OAuth redirect URI must be `http://localhost:3000/api/auth/callback/google` (swap host/port for other environments).
 - `/profile` is linked from the navbar but the route does not exist yet.
 
+### Dashboard
+
+- `app/dashboard/layout.tsx` is a server layout: reads the session with `auth.api.getSession({ headers: await headers() })`, redirects signed-out users to `/login`, and renders the sidebar plus page content. Role comes from `session.user.role` (`customer` | `owner` | `admin`); there are no per-role layouts.
+- `components/layout/Sidebar.tsx` is a client component that takes `role`, looks up that role's items in one `navItems` map, highlights the active route, and ends with a user menu (My Profile, Log out). Under `md` it becomes a slide-in drawer with a top bar.
+- `components/layout/Navbar.tsx` returns `null` on `/dashboard/*` so the dashboard shows only the sidebar chrome.
+- Sidebar destinations (`/dashboard/customer/rentals`, `/dashboard/owner/equipment`, `/dashboard/admin/users`, `/dashboard/profile`, …) are placeholders until those pages are added; only `/dashboard/{role}` exists today.
+
 ## Conventions
 
 - Universal chrome goes in `components/layout/` (Navbar, Footer); page-specific sections in `components/<Page>/` (e.g. `components/Home/Hero`); shadcn primitives in `components/ui/`.
@@ -71,7 +78,7 @@ Step 1 is the public homepage: responsive navbar (logo, dashboard, session-aware
 
 Step 2 adds working authentication: standalone login/signup pages wired to email/password and Google, session-guarded auth routes, success/error toasts, redirect to `/` after auth, and an optional profile image URL on signup.
 
-Do not add dashboard pages, equipment CRUD, booking/rental flow, Stripe, admin/vendor pages, or other backend APIs until explicitly requested.
+Do not add dashboard content, equipment CRUD, booking/rental flow, Stripe, admin/vendor features, or other backend APIs until explicitly requested; the dashboard shell (layout + sidebar) is in place.
 
 Rules that matter later: vendor listings need admin approval before appearing publicly; vendors manage only their own equipment and orders; customers manage only their own favorites/bookings/profile; Stripe stays in test mode and secrets stay server-side.
 
