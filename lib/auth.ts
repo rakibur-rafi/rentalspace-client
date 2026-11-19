@@ -4,22 +4,40 @@ import { mongodbAdapter } from "@better-auth/mongo-adapter";
 import { jwt } from "better-auth/plugins"
 
 const client = new MongoClient(process.env.MONGODB_URI as string);
-const db = client.db("rentalspacedb");
+const db = client.db("rentalspace-db");
 
 export const auth = betterAuth({
   database: mongodbAdapter(db, {
     client,
   }),
+  user: {
+       additionalFields: {
+          role: {
+              type: "string",
+              input: false,
+              defaultValue: "Customer",
+          } 
+      }
+  },
   emailAndPassword: { 
     enabled: true,
+    minPasswordLength: 6,
   },
-  plugins: [
-        jwt(), 
-    ],
-   socialProviders: {
+  socialProviders: {
         google: { 
             clientId: process.env.GOOGLE_CLIENT_ID as string, 
             clientSecret: process.env.GOOGLE_CLIENT_SECRET as string, 
         }, 
     },
+  plugins: [
+        jwt(), 
+    ],
+    session: {
+      cookieCache: {
+        enabled: true,
+        strategy: "jwt",
+        maxAge: 60 * 60 * 24 * 7,
+      }
+    },
+   
 });

@@ -41,16 +41,17 @@ Prettier: no semicolons, double quotes, 2 spaces, 80 columns, LF, Tailwind class
 
 Better Auth is wired end to end; do not replace it with another auth stack.
 
-- `lib/auth.ts` — server config: MongoDB adapter (`mongodb` + `@better-auth/mongo-adapter`, database `rentalspacedb`), `emailAndPassword`, and the Google social provider. Reads secrets from `.env` only.
+- `lib/auth.ts` — server config: MongoDB adapter (`mongodb` + `@better-auth/mongo-adapter`, database `rentalspace-db`), `emailAndPassword` with `minPasswordLength: 6`, the Google social provider, the `jwt()` plugin, and a `role` additional user field (default `"Customer"`, `input: false`). Reads secrets from `.env` only.
 - `lib/auth-client.ts` — browser client created with `createAuthClient({ baseURL: process.env.BETTER_AUTH_URL })`. Non-`NEXT_PUBLIC_` env vars are not inlined into client bundles, so this is normally `undefined` and Better Auth falls back to the page origin. Keep API calls same-origin.
 - `app/api/auth/[...all]/route.ts` — `toNextJsHandler(auth)` exports `GET`/`POST`.
-- Login and signup are intentionally standalone: `app/login/page.tsx` and `app/signup/page.tsx` are self-contained client components with duplicated markup/state. Do not extract shared auth components — the project owner wants login and signup code kept separate.
-- Each auth route has its own `layout.tsx` that exports metadata and guards the route on the server: `auth.api.getSession({ headers: await headers() })` redirects signed-in users to `/`.
+- Login and signup are intentionally standalone: `app/login/page.tsx` and `app/signup/page.tsx` are self-contained client components with duplicated markup/state. Do not extract shared auth components or add `layout.tsx` files for these routes — the project owner deletes them.
+- Signed-in users are kept out of `/login` and `/signup` client-side: each page calls `authClient.useSession()`, redirects with `router.replace("/")` once a session exists, and returns `null` only while a session exists. Do not also gate rendering on `isPending`: Better Auth reports `isPending` on every refetch while signed out, so unmounting the form then wipes the uncontrolled input values.
 - Forms call Better Auth directly (`signIn.email`, `signUp.email`, `signIn.social` with `provider: "google"` and `callbackURL: "/"`). On success they show a success toast, then `router.push("/")` + `router.refresh()`. On failure they show an error toast with `error.message`.
-- Signup includes an optional `imageUrl` field; it is sent to Better Auth as `image` (the user schema field). Uploads may replace this with imgbb later.
+- Signup validates the password before calling `signUp.email`: at least 6 characters with one uppercase and one lowercase letter (single regex in `handleSubmit`, error toast on failure). The field's `minLength` is 6 and the helper text states the rule.
+- Signup has an optional profile image file input. `handleImageUpload` calls `uploadImage` from `lib/actions/image.ts`, which posts the file to imgbb using `NEXT_PUBLIC_IMGBB_API_KEY` and returns the hosted URL. The URL is previewed with `next/image` and passed to Better Auth as `image`; signup submission is disabled while an upload is in progress.
 - Toasts use `components/ui/toast.tsx` (Base UI toast): `<Toaster />` is mounted once in `app/layout.tsx`, and any client component can call `toast.add({ title, description, type: "success" | "error" | ... })`.
 - `components/layout/Navbar.tsx` is a client component using `authClient.useSession()`: skeleton while pending, Profile + Log out when signed in, Log in + Sign up otherwise, and `authClient.signOut()` for logout.
-- Required `.env` keys: `BETTER_AUTH_SECRET`, `BETTER_AUTH_URL`, `MONGODB_URI`, `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`.
+- Required `.env` keys: `BETTER_AUTH_SECRET`, `BETTER_AUTH_URL`, `MONGODB_URI`, `NEXT_PUBLIC_IMGBB_API_KEY`, `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`.
 - Google Cloud OAuth redirect URI must be `http://localhost:3000/api/auth/callback/google` (swap host/port for other environments).
 - `/profile` is linked from the navbar but the route does not exist yet.
 

@@ -1,6 +1,7 @@
 "use client"
 
-import { useState, type FormEvent } from "react"
+import { useEffect, useState, type ChangeEvent, type FormEvent } from "react"
+import Image from "next/image"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { Eye, EyeOff } from "lucide-react"
@@ -10,6 +11,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { toast } from "@/components/ui/toast"
 import { authClient } from "@/lib/auth-client"
+import { uploadImage } from "@/lib/actions/image"
 
 function GoogleIcon() {
   return (
@@ -42,25 +44,69 @@ function GoogleIcon() {
 export default function SignupPage() {
   const router = useRouter()
   const [showPassword, setShowPassword] = useState(false)
+  const [imageUrl, setImageUrl] = useState("")
+  const [uploading, setUploading] = useState(false)
+  const [selectedFileName, setSelectedFileName] = useState("")
+  const { data: session, isPending } = authClient.useSession()
+
+  useEffect(() => {
+    if (!isPending && session) {
+      router.replace("/")
+    }
+  }, [isPending, session, router])
+
+  async function handleImageUpload(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0]
+
+    if (!file) return
+
+    setUploading(true)
+    setSelectedFileName(file.name)
+
+    try {
+      const uploadedUrl = await uploadImage(file)
+      setImageUrl(uploadedUrl)
+      toast.add({
+        title: "Image uploaded",
+        description: "Your profile image is ready.",
+        type: "success",
+      })
+    } catch {
+      toast.add({
+        title: "Image upload failed",
+        description: "Please try a different image.",
+        type: "error",
+      })
+    } finally {
+      setUploading(false)
+    }
+  }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
 
     const formData = new FormData(event.currentTarget)
-    const { name, email, password, imageUrl } = Object.fromEntries(
-      formData
-    ) as {
+    const { name, email, password } = Object.fromEntries(formData) as {
       name: string
       email: string
       password: string
-      imageUrl: string
+    }
+
+    if (!/^(?=.*[a-z])(?=.*[A-Z]).{6,}$/.test(password)) {
+      toast.add({
+        title: "Invalid password",
+        description:
+          "Use at least 6 characters with one uppercase and one lowercase letter.",
+        type: "error",
+      })
+      return
     }
 
     const { error } = await authClient.signUp.email({
       name,
       email,
       password,
-      image: imageUrl?.trim() || undefined,
+      image: imageUrl || undefined,
     })
 
     if (error) {
@@ -94,6 +140,10 @@ export default function SignupPage() {
         type: "error",
       })
     }
+  }
+
+  if (session) {
+    return null
   }
 
   return (
@@ -131,6 +181,40 @@ export default function SignupPage() {
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
+                {imageUrl ? (
+                  <div className="flex justify-center">
+                    <Image
+                      src={imageUrl}
+                      alt="Uploaded profile image"
+                      width={128}
+                      height={128}
+                      className="lg mt-2 h-24 w-24 rounded-full object-cover"
+                    />
+                  </div>
+                ) : null}
+                <Label htmlFor="image">Profile image</Label>
+                <Input
+                  id="image"
+                  name="image"
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageUpload}
+                  disabled={uploading}
+                />
+                {uploading ? (
+                  <p className="text-xs text-muted-foreground">Uploading...</p>
+                ) : selectedFileName ? (
+                  <p className="text-xs text-muted-foreground">
+                    Selected: {selectedFileName}
+                  </p>
+                ) : (
+                  <p className="text-xs text-muted-foreground">
+                    Choose an image for your profile
+                  </p>
+                )}
+              </div>
+
+              <div className="space-y-2">
                 <Label htmlFor="name">Full name</Label>
                 <Input
                   id="name"
@@ -140,20 +224,6 @@ export default function SignupPage() {
                   placeholder="Your full name"
                   required
                 />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="imageUrl">Profile image URL</Label>
-                <Input
-                  id="imageUrl"
-                  name="imageUrl"
-                  type="url"
-                  autoComplete="photo"
-                  placeholder="https://example.com/avatar.jpg"
-                />
-                <p className="text-xs text-muted-foreground">
-                  Paste a hosted image URL for now; uploads are coming soon.
-                </p>
               </div>
 
               <div className="space-y-2">
@@ -177,7 +247,7 @@ export default function SignupPage() {
                     type={showPassword ? "text" : "password"}
                     autoComplete="new-password"
                     placeholder="Create a password"
-                    minLength={8}
+                    minLength={6}
                     className="pr-10"
                     required
                   />
@@ -197,11 +267,16 @@ export default function SignupPage() {
                   </button>
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  Use at least 8 characters.
+                  Use at least 6 characters, including one uppercase and one
+                  lowercase letter.
                 </p>
               </div>
 
-              <Button type="submit" className="h-11 w-full rounded-full">
+              <Button
+                type="submit"
+                className="h-11 w-full rounded-full"
+                disabled={uploading}
+              >
                 Create account
               </Button>
             </form>

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, type FormEvent } from "react"
+import { useEffect, useState, type FormEvent } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { Eye, EyeOff } from "lucide-react"
@@ -42,6 +42,13 @@ function GoogleIcon() {
 export default function LoginPage() {
   const router = useRouter()
   const [showPassword, setShowPassword] = useState(false)
+  const { data: session, isPending } = authClient.useSession()
+
+  useEffect(() => {
+    if (!isPending && session) {
+      router.replace("/")
+    }
+  }, [isPending, session, router])
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -88,6 +95,10 @@ export default function LoginPage() {
         type: "error",
       })
     }
+  }
+
+  if (session) {
+    return null
   }
 
   return (

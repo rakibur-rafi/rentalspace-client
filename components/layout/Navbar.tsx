@@ -13,6 +13,7 @@ import {
   Sun,
   UserPlus,
   Wrench,
+  WrenchIcon,
   X,
 } from "lucide-react"
 
@@ -22,9 +23,11 @@ import { cn } from "@/lib/utils"
 import Image from "next/image"
 
 const navLinks = [
+  { href: "/equipments", label: "All Equipments", icon: WrenchIcon },
+]
+const userNavLinks = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
 ]
-
 function getInitials(name?: string | null) {
   if (!name) {
     return "U"
@@ -48,6 +51,7 @@ export function Navbar() {
   const user = session?.user
   const initials = getInitials(user?.name)
   const image = user?.image
+
   function toggleTheme() {
     setTheme(resolvedTheme === "dark" ? "light" : "dark")
   }
@@ -94,19 +98,21 @@ export function Navbar() {
           className="hidden items-center md:flex"
           aria-label="Main navigation"
         >
-          {navLinks.map(({ href, label, icon: Icon }) => (
-            <Link
-              key={href}
-              href={href}
-              className={cn(
-                buttonVariants({ variant: "ghost", size: "sm" }),
-                "gap-2"
-              )}
-            >
-              <Icon className="size-4" aria-hidden="true" />
-              {label}
-            </Link>
-          ))}
+          {(user ? userNavLinks : navLinks).map(
+            ({ href, label, icon: Icon }) => (
+              <Link
+                key={href}
+                href={href}
+                className={cn(
+                  buttonVariants({ variant: "ghost", size: "sm" }),
+                  "gap-2"
+                )}
+              >
+                <Icon className="size-4" aria-hidden="true" />
+                {label}
+              </Link>
+            )
+          )}
         </nav>
 
         <div className="flex items-center gap-1.5">

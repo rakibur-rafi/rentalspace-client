@@ -70,7 +70,7 @@ export function Hero() {
               </div>
             </div>
 
-            <div className="mt-12 flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between lg:flex-col lg:items-start xl:flex-row xl:items-end xl:justify-between">
+            <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between lg:flex-col lg:items-start xl:flex-row xl:items-end xl:justify-between">
               <div>
                 <p className="text-2xl font-semibold tracking-tight">25,000+</p>
                 <p className="mt-1 max-w-52 text-xs leading-5 text-muted-foreground">
