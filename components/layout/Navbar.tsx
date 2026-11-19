@@ -149,7 +149,7 @@ export function Navbar() {
             ) : user ? (
               <>
                 <Link
-                  href="/profile"
+                  href="/dashboard/profile"
                   className={cn(
                     buttonVariants({ variant: "ghost", size: "sm" }),
                     "gap-2"
@@ -256,7 +256,7 @@ export function Navbar() {
             ) : user ? (
               <>
                 <Link
-                  href="/profile"
+                  href="/dashboard/profile"
                   onClick={closeMenu}
                   className={cn(
                     buttonVariants({ variant: "ghost", size: "lg" }),
