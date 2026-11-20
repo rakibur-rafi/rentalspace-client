@@ -60,8 +60,9 @@ Better Auth is wired end to end; do not replace it with another auth stack.
 - `app/dashboard/layout.tsx` is a server layout: reads the session with `auth.api.getSession({ headers: await headers() })`, redirects signed-out users to `/login`, and renders the sidebar plus page content. Role comes from `session.user.role` (`customer` | `owner` | `admin`); there are no per-role layouts.
 - `components/layout/Sidebar.tsx` is a client component that takes `role`, looks up that role's items in one `navItems` map, highlights the active route, and ends with a user menu (My Profile, Log out). Under `md` it becomes a slide-in drawer with a top bar.
 - `components/layout/Navbar.tsx` returns `null` on `/dashboard/*` so the dashboard shows only the sidebar chrome.
-- Sidebar destinations (`/dashboard/customer/rentals`, `/dashboard/owner/equipment`, `/dashboard/admin/users`, `/dashboard/profile`, …) are placeholders until those pages are added; only `/dashboard/{role}` exists today.
-- `app/dashboard/owner/add-equipment/page.tsx` is the owner listing form (client). Images upload to imgbb with `uploadImage`; rental type is daily/weekly/monthly; submit builds the payload (owner name/email/image, `status: "pending"`) and logs it to the console. `createListing` in `lib/actions/equipments.ts` is not called yet.
+- Sidebar destinations such as `/dashboard/customer/rentals`, `/dashboard/owner/rentals`, `/dashboard/admin/users`, and `/dashboard/profile` are placeholders; only `/dashboard/{role}`, `/dashboard/owner/add-equipment`, and `/dashboard/owner/equipment` exist today.
+- `app/dashboard/owner/add-equipment/page.tsx` is the owner listing form (client). Images upload to imgbb with `uploadImage`; rental type is daily/weekly/monthly; submit gets a JWT with `authClient.token()`, calls `createListing` in `lib/actions/equipments.ts`, and redirects to the owner dashboard.
+- `app/dashboard/owner/equipment/page.tsx` is the owner "My Equipment" page (client): gets a JWT with `authClient.token()`, calls `getOwnerEquipments(email, token)` from `lib/api/equipments.ts`, and shows name/brand, category, price, rental type, status, and view/edit/delete actions. View routes to `/dashboard/owner/equipment/[id]` (the detail page does not exist yet); edit and delete open local modals that only log their values to the console.
 
 ## Conventions
 
