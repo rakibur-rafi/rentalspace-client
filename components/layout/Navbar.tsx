@@ -5,14 +5,14 @@ import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { useTheme } from "next-themes"
 import {
-  LayoutDashboard,
+  LayoutGrid,
   LogIn,
   LogOut,
   Menu,
   Moon,
   Sun,
   UserPlus,
-  Wrench,
+  Store,
   WrenchIcon,
   X,
 } from "lucide-react"
@@ -50,15 +50,15 @@ export function Navbar() {
   const role = user?.role
 
   const navLinks = [
-    { href: "/equipments", label: "All Equipments", icon: WrenchIcon },
+    { href: "/equipments", label: "All Equipment", icon: Store },
   ]
 
   const userNavLinks = [
-    { href: "/equipments", label: "All Equipments", icon: WrenchIcon },
+    { href: "/equipments", label: "All Equipment", icon: Store },
     {
       href: `/dashboard/${role}`,
       label: "Dashboard",
-      icon: LayoutDashboard,
+      icon: LayoutGrid,
     },
   ]
 
@@ -103,7 +103,7 @@ export function Navbar() {
           onClick={closeMenu}
         >
           <span className="flex size-9 items-center justify-center rounded-xl bg-primary text-primary-foreground">
-            <Wrench className="size-5" aria-hidden="true" />
+            <Store className="size-5" aria-hidden="true" />
           </span>
           <span className="text-lg font-semibold tracking-tight">
             RentalSpace

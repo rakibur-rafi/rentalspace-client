@@ -57,3 +57,17 @@ export const getOwnerRentals = async (token: string): Promise<Rental[]> => {
 
   return res.json()
 }
+
+export const getAllRentals = async (token: string): Promise<Rental[]> => {
+  if (!BASE_URL) {
+    throw new Error("The backend API URL is not configured.")
+  }
+
+  const res = await fetch(`${BASE_URL}/rentals/all-rentals`, {
+    headers: { Authorization: `Bearer ${token}` },
+    cache: "no-store",
+  })
+
+  if (!res.ok) throw new Error("Failed to fetch all rentals.")
+  return res.json()
+}

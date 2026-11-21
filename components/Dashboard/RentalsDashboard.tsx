@@ -7,6 +7,7 @@ import { CalendarDays, Eye, Package, RotateCw } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import {
+  getAllRentals,
   getCustomerRentals,
   getOwnerRentals,
   type Rental,
@@ -16,7 +17,7 @@ import { authClient } from "@/lib/auth-client"
 import { updateRentalStatus, type RentalStatus } from "@/lib/actions/status"
 import { toast } from "@/components/ui/toast"
 
-type View = "customer" | "owner"
+type View = "customer" | "owner" | "admin"
 const rentalStatuses: RentalStatus[] = ["pending", "on delivery", "delivered"]
 
 type RentalRow = Rental & {
@@ -69,7 +70,9 @@ export default function RentalsDashboard({ view }: { view: View }) {
       const result =
         view === "customer"
           ? await getCustomerRentals(data.token)
-          : await getOwnerRentals(data.token)
+          : view === "owner"
+            ? await getOwnerRentals(data.token)
+            : await getAllRentals(data.token)
       const rows = await Promise.all(
         (Array.isArray(result) ? result : []).map(async (rental) => {
           const equipmentLinkId = getEquipmentId(rental)
@@ -145,7 +148,12 @@ export default function RentalsDashboard({ view }: { view: View }) {
     return () => window.clearTimeout(timer)
   }, [loadRentals])
 
-  const title = view === "customer" ? "My Rentals" : "Equipment Rentals"
+  const title =
+    view === "customer"
+      ? "My Rentals"
+      : view === "owner"
+        ? "Equipment Rentals"
+        : "All Rentals"
 
   return (
     <section className="mx-auto w-full max-w-6xl space-y-6">
@@ -154,7 +162,9 @@ export default function RentalsDashboard({ view }: { view: View }) {
         <p className="mt-1 text-sm text-muted-foreground">
           {view === "customer"
             ? "Track your equipment bookings and payment status."
-            : "Review rentals made for your equipment."}
+            : view === "owner"
+              ? "Review rentals made for your equipment."
+              : "Review every equipment rental on RentalSpace."}
         </p>
       </div>
 
@@ -208,12 +218,14 @@ export default function RentalsDashboard({ view }: { view: View }) {
             <thead className="border-b bg-muted/50 text-muted-foreground">
               <tr>
                 <th className="px-4 py-3 font-medium">Equipment</th>
-                {view === "owner" ? (
+                {view !== "customer" ? (
                   <th className="px-4 py-3 font-medium">Customer</th>
+                ) : null}
+                {view === "admin" ? (
+                  <th className="px-4 py-3 font-medium">Owner</th>
                 ) : null}
                 <th className="px-4 py-3 font-medium">Booked</th>
                 <th className="px-4 py-3 font-medium">Quantity</th>
-                <th className="px-4 py-3 font-medium">Rental type</th>
                 <th className="px-4 py-3 font-medium">Total</th>
                 <th className="px-4 py-3 font-medium">
                   {view === "owner" ? "Update status" : "Status"}
@@ -246,16 +258,16 @@ export default function RentalsDashboard({ view }: { view: View }) {
                       </div>
                     </div>
                   </td>
-                  {view === "owner" ? (
+                  {view !== "customer" ? (
                     <td className="px-4 py-3">{rental.userEmail ?? "—"}</td>
+                  ) : null}
+                  {view === "admin" ? (
+                    <td className="px-4 py-3">{rental.ownerEmail ?? "—"}</td>
                   ) : null}
                   <td className="px-4 py-3">
                     {formatDate(rental.checkoutDate)}
                   </td>
                   <td className="px-4 py-3">{rental.quantity ?? 1}</td>
-                  <td className="px-4 py-3 capitalize">
-                    {rental.rentalType ?? "—"}
-                  </td>
                   <td className="px-4 py-3 font-medium">
                     {formatPrice(rental.totalPrice)}
                   </td>

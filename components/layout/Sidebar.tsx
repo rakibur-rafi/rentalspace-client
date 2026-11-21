@@ -15,6 +15,7 @@ import {
   PlusCircle,
   User,
   Users,
+  Store,
   Wrench,
   X,
   type LucideIcon,
@@ -29,6 +30,11 @@ const navItems: Record<
   { href: string; label: string; icon: LucideIcon }[]
 > = {
   customer: [
+    {
+      href: "/equipments",
+      label: "Browse Equipments",
+      icon: Store,
+    },
     {
       href: "/dashboard/customer/rentals",
       label: "My Rentals",
@@ -254,14 +260,6 @@ export function Sidebar({ role }: { role?: string | null }) {
 
           {userMenuOpen ? (
             <div className="absolute inset-x-3 bottom-full z-50 mb-2 overflow-hidden rounded-xl border bg-popover p-1 shadow-md">
-              <Link
-                href="/dashboard/profile"
-                onClick={() => setUserMenuOpen(false)}
-                className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm transition-colors hover:bg-muted"
-              >
-                <User className="size-4" aria-hidden="true" />
-                My Profile
-              </Link>
               <button
                 type="button"
                 onClick={handleSignOut}
