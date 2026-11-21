@@ -101,5 +101,5 @@ After finishing a step, update the table below, summarize changed files, and wai
 |---|---|---|
 | 1 | Project understanding and homepage | In progress |
 | 2 | Authentication pages and session flow | In progress |
-| 3 | To be defined | Pending |
+| 3 | Customer favorites and rentals | Complete |
 | 4 | To be defined | Pending |

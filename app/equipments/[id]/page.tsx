@@ -4,6 +4,7 @@ import { notFound } from "next/navigation"
 import { ArrowLeft, MapPin, Package } from "lucide-react"
 
 import { buttonVariants } from "@/components/ui/button"
+import FavoriteButton from "@/components/Equipments/FavoriteButton"
 import RentNowButton from "@/components/Equipments/RentNowButton"
 import { getEquipmentById } from "@/lib/api/equipments"
 
@@ -107,10 +108,15 @@ export default async function EquipmentDetailPage({
             </span>
           </p>
 
-          <RentNowButton
-            equipmentId={id}
-            availableQuantity={equipment.availableQuantity}
-          />
+          <div className="flex items-center gap-3">
+            <div className="flex-1">
+              <RentNowButton
+                equipmentId={id}
+                availableQuantity={equipment.availableQuantity}
+              />
+            </div>
+            <FavoriteButton equipment={equipment} checkSaved />
+          </div>
 
           <dl className="grid gap-3 border-t pt-5 text-sm sm:grid-cols-2">
             <div>

@@ -7,7 +7,10 @@ import { useRouter, useSearchParams } from "next/navigation"
 import { MapPin, Package, SlidersHorizontal } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
+import FavoriteButton from "@/components/Equipments/FavoriteButton"
 import { getEquipments } from "@/lib/api/equipments"
+import { getFavourites } from "@/lib/api/favourites"
+import { authClient } from "@/lib/auth-client"
 import { cn } from "@/lib/utils"
 
 type Equipment = {
@@ -97,55 +100,64 @@ function FilterGroup({
   )
 }
 
-function EquipmentCard({ equipment }: { equipment: Equipment }) {
+function EquipmentCard({
+  equipment,
+  initiallySaved,
+}: {
+  equipment: Equipment
+  initiallySaved: boolean
+}) {
   return (
-    <Link
-      href={`/equipments/${equipment._id}`}
-      className="group overflow-hidden rounded-2xl border bg-card transition-shadow hover:shadow-md"
-    >
-      <div className="relative h-44 overflow-hidden bg-muted">
-        {equipment.image ? (
-          <Image
-            src={equipment.image}
-            alt={equipment.name}
-            fill
-            sizes="(min-width: 1280px) 25vw, (min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
-            className="object-cover transition-transform duration-500 group-hover:scale-105"
-          />
-        ) : (
-          <span className="flex h-full items-center justify-center text-muted-foreground">
-            <Package className="size-8" aria-hidden="true" />
-          </span>
-        )}
-        <span className="absolute top-3 left-3 rounded-full bg-background/90 px-2.5 py-1 text-xs font-medium backdrop-blur">
-          {equipment.category}
-        </span>
+    <article className="group relative overflow-hidden rounded-2xl border bg-card transition-shadow hover:shadow-md">
+      <div className="absolute top-3 right-3 z-10">
+        <FavoriteButton equipment={equipment} initiallySaved={initiallySaved} />
       </div>
+      <Link href={`/equipments/${equipment._id}`} className="block">
+        <div className="relative h-44 overflow-hidden bg-muted">
+          {equipment.image ? (
+            <Image
+              src={equipment.image}
+              alt={equipment.name}
+              fill
+              sizes="(min-width: 1280px) 25vw, (min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
+              className="object-cover transition-transform duration-500 group-hover:scale-105"
+            />
+          ) : (
+            <span className="flex h-full items-center justify-center text-muted-foreground">
+              <Package className="size-8" aria-hidden="true" />
+            </span>
+          )}
+          <span className="absolute top-3 left-3 rounded-full bg-background/90 px-2.5 py-1 text-xs font-medium backdrop-blur">
+            {equipment.category}
+          </span>
+        </div>
 
-      <div className="p-4">
-        <p className="truncate font-medium">{equipment.name}</p>
-        <p className="mt-0.5 truncate text-xs text-muted-foreground">
-          {[equipment.brand, equipment.model].filter(Boolean).join(" ") ||
-            equipment.condition}
-        </p>
-        <p className="mt-2 flex items-center gap-1 text-xs text-muted-foreground">
-          <MapPin className="size-3.5 shrink-0" aria-hidden="true" />
-          <span className="truncate">{equipment.location}</span>
-        </p>
-        <p className="mt-3 text-sm font-semibold">
-          {formatPrice(equipment.rentalPrice)}
-          <span className="ml-1 text-xs font-normal text-muted-foreground">
-            / {equipment.rentalType}
-          </span>
-        </p>
-      </div>
-    </Link>
+        <div className="p-4">
+          <p className="truncate font-medium">{equipment.name}</p>
+          <p className="mt-0.5 truncate text-xs text-muted-foreground">
+            {[equipment.brand, equipment.model].filter(Boolean).join(" ") ||
+              equipment.condition}
+          </p>
+          <p className="mt-2 flex items-center gap-1 text-xs text-muted-foreground">
+            <MapPin className="size-3.5 shrink-0" aria-hidden="true" />
+            <span className="truncate">{equipment.location}</span>
+          </p>
+          <p className="mt-3 text-sm font-semibold">
+            {formatPrice(equipment.rentalPrice)}
+            <span className="ml-1 text-xs font-normal text-muted-foreground">
+              / {equipment.rentalType}
+            </span>
+          </p>
+        </div>
+      </Link>
+    </article>
   )
 }
 
 export function EquipmentsList() {
   const router = useRouter()
   const searchParams = useSearchParams()
+  const { data: session } = authClient.useSession()
 
   const category = searchParams.get("category")
   const location = searchParams.get("location")
@@ -159,6 +171,36 @@ export function EquipmentsList() {
   const [equipments, setEquipments] = useState<Equipment[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
+  const [favoriteIds, setFavoriteIds] = useState<Set<string>>(new Set())
+
+  useEffect(() => {
+    if (!session || (session.user.role ?? "").toLowerCase() !== "customer") {
+      setFavoriteIds(new Set())
+      return
+    }
+
+    let active = true
+
+    async function loadFavorites() {
+      try {
+        const { data } = await authClient.token()
+        if (!data?.token) return
+
+        const favorites = await getFavourites(data.token)
+        if (active) {
+          setFavoriteIds(
+            new Set(favorites.map((favorite) => favorite.equipmentId))
+          )
+        }
+      } catch {}
+    }
+
+    loadFavorites()
+
+    return () => {
+      active = false
+    }
+  }, [session])
 
   useEffect(() => {
     let active = true
@@ -326,7 +368,11 @@ export function EquipmentsList() {
           </p>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {equipments.map((equipment) => (
-              <EquipmentCard key={equipment._id} equipment={equipment} />
+              <EquipmentCard
+                key={equipment._id}
+                equipment={equipment}
+                initiallySaved={favoriteIds.has(equipment._id)}
+              />
             ))}
           </div>
         </>
