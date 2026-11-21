@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react"
 import Image from "next/image"
 import Link from "next/link"
-import { CalendarDays, Package, RotateCw } from "lucide-react"
+import { CalendarDays, Eye, Package, RotateCw } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -13,8 +13,11 @@ import {
 } from "@/lib/api/rentals"
 import { getEquipmentById } from "@/lib/api/equipments"
 import { authClient } from "@/lib/auth-client"
+import { updateRentalStatus, type RentalStatus } from "@/lib/actions/status"
+import { toast } from "@/components/ui/toast"
 
 type View = "customer" | "owner"
+const rentalStatuses: RentalStatus[] = ["pending", "on delivery", "delivered"]
 
 type RentalRow = Rental & {
   equipmentLinkId: string
@@ -50,6 +53,7 @@ export default function RentalsDashboard({ view }: { view: View }) {
   const [rentals, setRentals] = useState<RentalRow[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
+  const [updatingRentalId, setUpdatingRentalId] = useState<string | null>(null)
 
   const loadRentals = useCallback(async () => {
     if (!session) return
@@ -96,6 +100,45 @@ export default function RentalsDashboard({ view }: { view: View }) {
       setLoading(false)
     }
   }, [session, view])
+
+  async function handleStatusChange(rental: RentalRow, status: RentalStatus) {
+    const previousStatus = rental.status
+    setUpdatingRentalId(rental._id)
+    setRentals((current) =>
+      current.map((item) =>
+        item._id === rental._id ? { ...item, status } : item
+      )
+    )
+
+    try {
+      const { data } = await authClient.token()
+      if (!data?.token) {
+        throw new Error("Your session expired. Please sign in again.")
+      }
+      await updateRentalStatus(rental._id, status, data.token)
+      toast.add({
+        title: "Rental status updated",
+        description: `Status changed to ${status}.`,
+        type: "success",
+      })
+    } catch (updateError) {
+      setRentals((current) =>
+        current.map((item) =>
+          item._id === rental._id ? { ...item, status: previousStatus } : item
+        )
+      )
+      toast.add({
+        title: "Could not update rental status",
+        description:
+          updateError instanceof Error
+            ? updateError.message
+            : "Please try again.",
+        type: "error",
+      })
+    } finally {
+      setUpdatingRentalId(null)
+    }
+  }
 
   useEffect(() => {
     const timer = window.setTimeout(() => void loadRentals(), 0)
@@ -172,7 +215,10 @@ export default function RentalsDashboard({ view }: { view: View }) {
                 <th className="px-4 py-3 font-medium">Quantity</th>
                 <th className="px-4 py-3 font-medium">Rental type</th>
                 <th className="px-4 py-3 font-medium">Total</th>
-                <th className="px-4 py-3 font-medium">Status</th>
+                <th className="px-4 py-3 font-medium">
+                  {view === "owner" ? "Update status" : "Status"}
+                </th>
+                <th className="px-4 py-3 text-right font-medium">View</th>
               </tr>
             </thead>
             <tbody className="divide-y">
@@ -197,14 +243,6 @@ export default function RentalsDashboard({ view }: { view: View }) {
                         <p className="max-w-56 truncate font-medium">
                           {rental.equipmentName}
                         </p>
-                        {rental.equipmentLinkId ? (
-                          <Link
-                            href={`/equipments/${rental.equipmentLinkId}`}
-                            className="text-xs text-muted-foreground underline underline-offset-2"
-                          >
-                            View equipment
-                          </Link>
-                        ) : null}
                       </div>
                     </div>
                   </td>
@@ -222,9 +260,51 @@ export default function RentalsDashboard({ view }: { view: View }) {
                     {formatPrice(rental.totalPrice)}
                   </td>
                   <td className="px-4 py-3">
-                    <span className="inline-flex rounded-full bg-muted px-2.5 py-1 text-xs font-medium capitalize">
-                      {rental.status ?? "Pending"}
-                    </span>
+                    {view === "owner" ? (
+                      <select
+                        aria-label={`Update status for ${rental.equipmentName}`}
+                        value={
+                          rentalStatuses.includes(
+                            (rental.status?.toLowerCase() ??
+                              "pending") as RentalStatus
+                          )
+                            ? (rental.status?.toLowerCase() ?? "pending")
+                            : "pending"
+                        }
+                        disabled={updatingRentalId === rental._id}
+                        onChange={(event) =>
+                          handleStatusChange(
+                            rental,
+                            event.target.value as RentalStatus
+                          )
+                        }
+                        className="h-9 rounded-lg border border-input bg-background px-2 text-sm capitalize disabled:opacity-50"
+                      >
+                        {rentalStatuses.map((status) => (
+                          <option key={status} value={status}>
+                            {status}
+                          </option>
+                        ))}
+                      </select>
+                    ) : (
+                      <span className="inline-flex rounded-full bg-muted px-2.5 py-1 text-xs font-medium capitalize">
+                        {rental.status ?? "Pending"}
+                      </span>
+                    )}
+                  </td>
+                  <td className="px-4 py-3 text-right">
+                    {rental.equipmentLinkId ? (
+                      <Link
+                        href={`/equipments/${rental.equipmentLinkId}`}
+                        aria-label={`View ${rental.equipmentName}`}
+                        title="View equipment"
+                        className="inline-flex size-9 items-center justify-center rounded-full border transition-colors hover:bg-muted"
+                      >
+                        <Eye className="size-4" aria-hidden="true" />
+                      </Link>
+                    ) : (
+                      <span className="text-muted-foreground">—</span>
+                    )}
                   </td>
                 </tr>
               ))}
