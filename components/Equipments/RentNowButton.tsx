@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation"
 
 import { Button } from "@/components/ui/button"
+import { toast } from "@/components/ui/toast"
 import { authClient } from "@/lib/auth-client"
 
 export default function RentNowButton({
@@ -20,6 +21,15 @@ export default function RentNowButton({
 
     if (!session) {
       router.push(`/login?returnTo=${encodeURIComponent(checkoutPath)}`)
+      return
+    }
+
+    if ((session.user.role ?? "").toLowerCase() !== "customer") {
+      toast.add({
+        title: "Customer account required",
+        description: "Only customer accounts can rent equipment.",
+        type: "error",
+      })
       return
     }
 

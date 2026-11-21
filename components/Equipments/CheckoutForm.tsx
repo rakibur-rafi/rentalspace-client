@@ -31,6 +31,38 @@ function formatDate(value: Date) {
   return `${year}-${month}-${day}`
 }
 
+function dateAfterDays(days: number) {
+  const today = new Date()
+  const date = new Date(
+    Date.UTC(today.getFullYear(), today.getMonth(), today.getDate() + days)
+  )
+  return date.toISOString().slice(0, 10)
+}
+
+function getRentEndDate(startDate: string, rentalType: string) {
+  if (!startDate) return ""
+
+  const [year, month, day] = startDate.split("-").map(Number)
+  const date = new Date(Date.UTC(year, month - 1, day))
+  const normalizedType = rentalType.toLowerCase()
+
+  if (normalizedType === "weekly") {
+    date.setUTCDate(date.getUTCDate() + 7)
+  } else if (normalizedType === "monthly") {
+    const originalDay = date.getUTCDate()
+    date.setUTCDate(1)
+    date.setUTCMonth(date.getUTCMonth() + 1)
+    const lastDayOfMonth = new Date(
+      Date.UTC(date.getUTCFullYear(), date.getUTCMonth() + 1, 0)
+    ).getUTCDate()
+    date.setUTCDate(Math.min(originalDay, lastDayOfMonth))
+  } else {
+    date.setUTCDate(date.getUTCDate() + 1)
+  }
+
+  return date.toISOString().slice(0, 10)
+}
+
 export default function CheckoutForm({
   equipmentId,
   rentalPrice,
@@ -47,7 +79,10 @@ export default function CheckoutForm({
   const [quantity, setQuantity] = useState(1)
   const [phone, setPhone] = useState("")
   const [address, setAddress] = useState("")
+  const [rentStartDate, setRentStartDate] = useState(() => dateAfterDays(3))
   const [submitting, setSubmitting] = useState(false)
+  const minimumStartDate = dateAfterDays(3)
+  const rentEndDate = getRentEndDate(rentStartDate, rentalType)
 
   useEffect(() => {
     if (!session) return
@@ -84,6 +119,15 @@ export default function CheckoutForm({
       return
     }
 
+    if ((session.user.role ?? "").toLowerCase() !== "customer") {
+      toast.add({
+        title: "Customer account required",
+        description: "Only customer accounts can rent equipment.",
+        type: "error",
+      })
+      return
+    }
+
     const formData = new FormData(event.currentTarget)
     const selectedQuantity = Number(formData.get("quantity"))
     const checkoutData = {
@@ -93,6 +137,8 @@ export default function CheckoutForm({
       address: String(formData.get("address") ?? "").trim(),
       totalPrice: rentalPrice * selectedQuantity,
       rentalType,
+      rentStartDate,
+      rentEndDate,
       checkoutDate: formatDate(new Date()),
     }
 
@@ -147,6 +193,38 @@ export default function CheckoutForm({
         />
         <p className="text-xs text-muted-foreground">
           Choose up to {availableQuantity} available units.
+        </p>
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="rentStartDate">Rental start date</Label>
+        <Input
+          id="rentStartDate"
+          name="rentStartDate"
+          type="date"
+          min={minimumStartDate}
+          value={rentStartDate}
+          onChange={(event) => setRentStartDate(event.target.value)}
+          required
+        />
+        <p className="text-xs text-muted-foreground">
+          Start dates must allow at least 3 days for delivery.
+        </p>
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="rentEndDate">Rental end date</Label>
+        <Input
+          id="rentEndDate"
+          name="rentEndDate"
+          type="date"
+          value={rentEndDate}
+          readOnly
+          required
+        />
+        <p className="text-xs text-muted-foreground">
+          Calculated from the selected start date and {rentalType} rental
+          period.
         </p>
       </div>
 

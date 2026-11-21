@@ -1,0 +1,237 @@
+"use client"
+
+import { useCallback, useEffect, useState } from "react"
+import Image from "next/image"
+import Link from "next/link"
+import { CalendarDays, Package, RotateCw } from "lucide-react"
+
+import { Button } from "@/components/ui/button"
+import {
+  getCustomerRentals,
+  getOwnerRentals,
+  type Rental,
+} from "@/lib/api/rentals"
+import { getEquipmentById } from "@/lib/api/equipments"
+import { authClient } from "@/lib/auth-client"
+
+type View = "customer" | "owner"
+
+type RentalRow = Rental & {
+  equipmentLinkId: string
+  equipmentName: string
+  equipmentImage?: string
+}
+
+function formatPrice(value?: number) {
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "BDT",
+  }).format(value || 0)
+}
+
+function formatDate(value?: string) {
+  if (!value) return "Date unavailable"
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return value
+  return new Intl.DateTimeFormat("en", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  }).format(date)
+}
+
+function getEquipmentId(rental: Rental) {
+  const id = rental.equipmentId ?? rental.equipmentID
+  return id ? String(id) : ""
+}
+
+export default function RentalsDashboard({ view }: { view: View }) {
+  const { data: session } = authClient.useSession()
+  const [rentals, setRentals] = useState<RentalRow[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState("")
+
+  const loadRentals = useCallback(async () => {
+    if (!session) return
+    setLoading(true)
+    setError("")
+
+    try {
+      const { data } = await authClient.token()
+      if (!data?.token) {
+        throw new Error("Your session expired. Please sign in again.")
+      }
+
+      const result =
+        view === "customer"
+          ? await getCustomerRentals(data.token)
+          : await getOwnerRentals(data.token)
+      const rows = await Promise.all(
+        (Array.isArray(result) ? result : []).map(async (rental) => {
+          const equipmentLinkId = getEquipmentId(rental)
+          let equipmentName = rental.equipment?.name ?? "Rental equipment"
+          let equipmentImage = rental.equipment?.image
+
+          if (equipmentLinkId && !rental.equipment?.name) {
+            try {
+              const equipment = await getEquipmentById(equipmentLinkId)
+              equipmentName = equipment.name ?? equipmentName
+              equipmentImage = equipment.image ?? equipmentImage
+            } catch {
+              // Keep showing the rental even if its equipment was removed.
+            }
+          }
+
+          return { ...rental, equipmentLinkId, equipmentName, equipmentImage }
+        })
+      )
+      setRentals(rows)
+    } catch (loadError) {
+      setError(
+        loadError instanceof Error
+          ? loadError.message
+          : "Could not load rentals."
+      )
+    } finally {
+      setLoading(false)
+    }
+  }, [session, view])
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => void loadRentals(), 0)
+    return () => window.clearTimeout(timer)
+  }, [loadRentals])
+
+  const title = view === "customer" ? "My Rentals" : "Equipment Rentals"
+
+  return (
+    <section className="mx-auto w-full max-w-6xl space-y-6">
+      <div>
+        <h1 className="text-3xl font-semibold tracking-tight">{title}</h1>
+        <p className="mt-1 text-sm text-muted-foreground">
+          {view === "customer"
+            ? "Track your equipment bookings and payment status."
+            : "Review rentals made for your equipment."}
+        </p>
+      </div>
+
+      {loading ? (
+        <div className="h-52 animate-pulse rounded-2xl border bg-card" />
+      ) : error ? (
+        <div className="flex flex-col items-center gap-3 rounded-2xl border bg-card px-5 py-16 text-center">
+          <p className="text-sm text-muted-foreground">{error}</p>
+          <Button
+            type="button"
+            variant="outline"
+            className="rounded-full"
+            onClick={loadRentals}
+          >
+            <RotateCw className="size-4" aria-hidden="true" /> Try again
+          </Button>
+        </div>
+      ) : rentals.length === 0 ? (
+        <div className="flex flex-col items-center gap-3 rounded-2xl border bg-card px-5 py-16 text-center">
+          <span className="flex size-12 items-center justify-center rounded-full bg-muted text-muted-foreground">
+            {view === "customer" ? (
+              <CalendarDays className="size-6" aria-hidden="true" />
+            ) : (
+              <Package className="size-6" aria-hidden="true" />
+            )}
+          </span>
+          <div>
+            <p className="font-medium">
+              {view === "customer"
+                ? "No rentals yet"
+                : "No equipment rentals yet"}
+            </p>
+            <p className="mt-1 text-sm text-muted-foreground">
+              {view === "customer"
+                ? "When you rent equipment, your bookings will appear here."
+                : "Rentals for your listed equipment will appear here."}
+            </p>
+          </div>
+          {view === "customer" ? (
+            <Link
+              href="/equipments"
+              className="text-sm font-medium underline underline-offset-4"
+            >
+              Browse equipment
+            </Link>
+          ) : null}
+        </div>
+      ) : (
+        <div className="overflow-x-auto rounded-2xl border bg-card">
+          <table className="w-full min-w-[760px] text-left text-sm">
+            <thead className="border-b bg-muted/50 text-muted-foreground">
+              <tr>
+                <th className="px-4 py-3 font-medium">Equipment</th>
+                {view === "owner" ? (
+                  <th className="px-4 py-3 font-medium">Customer</th>
+                ) : null}
+                <th className="px-4 py-3 font-medium">Booked</th>
+                <th className="px-4 py-3 font-medium">Quantity</th>
+                <th className="px-4 py-3 font-medium">Rental type</th>
+                <th className="px-4 py-3 font-medium">Total</th>
+                <th className="px-4 py-3 font-medium">Status</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y">
+              {rentals.map((rental) => (
+                <tr key={rental._id}>
+                  <td className="px-4 py-3">
+                    <div className="flex items-center gap-3">
+                      <div className="relative flex size-12 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-muted text-muted-foreground">
+                        {rental.equipmentImage ? (
+                          <Image
+                            src={rental.equipmentImage}
+                            alt=""
+                            fill
+                            sizes="48px"
+                            className="object-cover"
+                          />
+                        ) : (
+                          <Package className="size-5" aria-hidden="true" />
+                        )}
+                      </div>
+                      <div className="min-w-0">
+                        <p className="max-w-56 truncate font-medium">
+                          {rental.equipmentName}
+                        </p>
+                        {rental.equipmentLinkId ? (
+                          <Link
+                            href={`/equipments/${rental.equipmentLinkId}`}
+                            className="text-xs text-muted-foreground underline underline-offset-2"
+                          >
+                            View equipment
+                          </Link>
+                        ) : null}
+                      </div>
+                    </div>
+                  </td>
+                  {view === "owner" ? (
+                    <td className="px-4 py-3">{rental.userEmail ?? "—"}</td>
+                  ) : null}
+                  <td className="px-4 py-3">
+                    {formatDate(rental.checkoutDate)}
+                  </td>
+                  <td className="px-4 py-3">{rental.quantity ?? 1}</td>
+                  <td className="px-4 py-3 capitalize">
+                    {rental.rentalType ?? "—"}
+                  </td>
+                  <td className="px-4 py-3 font-medium">
+                    {formatPrice(rental.totalPrice)}
+                  </td>
+                  <td className="px-4 py-3">
+                    <span className="inline-flex rounded-full bg-muted px-2.5 py-1 text-xs font-medium capitalize">
+                      {rental.status ?? "Pending"}
+                    </span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </section>
+  )
+}

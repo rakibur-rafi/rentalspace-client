@@ -7,6 +7,8 @@ export type CheckoutPayload = {
   address: string
   totalPrice: number
   rentalType: string
+  rentStartDate: string
+  rentEndDate: string
   checkoutDate: string
 }
 
