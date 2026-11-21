@@ -11,6 +11,14 @@ import { Label } from "@/components/ui/label"
 import { toast } from "@/components/ui/toast"
 import { authClient } from "@/lib/auth-client"
 
+function getReturnTo() {
+  const returnTo = new URLSearchParams(window.location.search).get("returnTo")
+
+  return returnTo?.startsWith("/") && !returnTo.startsWith("//")
+    ? returnTo
+    : "/"
+}
+
 function GoogleIcon() {
   return (
     <svg
@@ -46,7 +54,7 @@ export default function LoginPage() {
 
   useEffect(() => {
     if (!isPending && session) {
-      router.replace("/")
+      router.replace(getReturnTo())
     }
   }, [isPending, session, router])
 
@@ -78,14 +86,14 @@ export default function LoginPage() {
       description: "Welcome back to RentalSpace.",
       type: "success",
     })
-    router.push("/")
+    router.push(getReturnTo())
     router.refresh()
   }
 
   async function handleGoogleSignIn() {
     const { error } = await authClient.signIn.social({
       provider: "google",
-      callbackURL: "/",
+      callbackURL: getReturnTo(),
     })
 
     if (error) {

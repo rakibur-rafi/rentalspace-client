@@ -16,14 +16,14 @@ const categories = [
   {
     title: "Power tools",
     meta: "120+ listings",
-    href: "/equipment?category=power-tools",
+    href: "/equipments?category=Power%20Tools",
     image: "/images/category-power-tools.jpg",
     alt: "Cordless drill resting on a workbench",
   },
   {
     title: "Heavy equipment",
     meta: "80+ listings",
-    href: "/equipment?category=heavy-equipment",
+    href: "/equipments?category=Heavy%20Equipment",
     image: "/images/category-heavy-equipment.jpg",
     alt: "Mini excavator on a construction site",
   },
@@ -49,7 +49,7 @@ export function Hero() {
 
               <div className="mt-8 flex items-center gap-3">
                 <Link
-                  href="/equipment"
+                  href="/equipments"
                   className={cn(
                     buttonVariants({ size: "lg" }),
                     "h-12 rounded-full px-6"
@@ -58,7 +58,7 @@ export function Hero() {
                   Explore equipment
                 </Link>
                 <Link
-                  href="/equipment"
+                  href="/equipments"
                   aria-label="Explore equipment"
                   className={cn(
                     buttonVariants({ variant: "outline", size: "icon-lg" }),
@@ -163,7 +163,7 @@ export function Hero() {
               you.
             </p>
             <Link
-              href="/equipment"
+              href="/equipments"
               className={cn(
                 buttonVariants({ size: "sm" }),
                 "mt-5 rounded-full px-4"

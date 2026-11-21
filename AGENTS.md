@@ -53,16 +53,25 @@ Better Auth is wired end to end; do not replace it with another auth stack.
 - `components/layout/Navbar.tsx` is a client component using `authClient.useSession()`: skeleton while pending, Profile + Log out when signed in, Log in + Sign up otherwise, and `authClient.signOut()` for logout.
 - Required `.env` keys: `BETTER_AUTH_SECRET`, `BETTER_AUTH_URL`, `MONGODB_URI`, `NEXT_PUBLIC_IMGBB_API_KEY`, `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`.
 - Google Cloud OAuth redirect URI must be `http://localhost:3000/api/auth/callback/google` (swap host/port for other environments).
-- `/profile` is linked from the navbar but the route does not exist yet.
+- The navbar and sidebar both link to `/dashboard/profile`, which exists.
 
 ### Dashboard
 
 - `app/dashboard/layout.tsx` is a server layout: reads the session with `auth.api.getSession({ headers: await headers() })`, redirects signed-out users to `/login`, and renders the sidebar plus page content. Role comes from `session.user.role` (`customer` | `owner` | `admin`); there are no per-role layouts.
 - `components/layout/Sidebar.tsx` is a client component that takes `role`, looks up that role's items in one `navItems` map, highlights the active route, and ends with a user menu (My Profile, Log out). Under `md` it becomes a slide-in drawer with a top bar.
 - `components/layout/Navbar.tsx` returns `null` on `/dashboard/*` so the dashboard shows only the sidebar chrome.
-- Sidebar destinations such as `/dashboard/customer/rentals`, `/dashboard/owner/rentals`, `/dashboard/admin/users`, and `/dashboard/profile` are placeholders; only `/dashboard/{role}`, `/dashboard/owner/add-equipment`, and `/dashboard/owner/equipment` exist today.
+- Sidebar destinations such as `/dashboard/customer/rentals`, `/dashboard/owner/rentals`, and `/dashboard/admin/users` are placeholders; `/dashboard/{role}`, `/dashboard/owner/add-equipment`, `/dashboard/owner/equipment`, and `/dashboard/profile` exist today.
 - `app/dashboard/owner/add-equipment/page.tsx` is the owner listing form (client). Images upload to imgbb with `uploadImage`; rental type is daily/weekly/monthly; submit gets a JWT with `authClient.token()`, calls `createListing` in `lib/actions/equipments.ts`, and redirects to the owner dashboard.
-- `app/dashboard/owner/equipment/page.tsx` is the owner "My Equipment" page (client): gets a JWT with `authClient.token()`, calls `getOwnerEquipments(email, token)` from `lib/api/equipments.ts`, and shows name/brand, category, price, rental type, status, and view/edit/delete actions. View routes to `/dashboard/owner/equipment/[id]` (the detail page does not exist yet); edit and delete open local modals that only log their values to the console.
+- `app/dashboard/owner/equipment/page.tsx` is the owner "My Equipment" page (client): gets a JWT with `authClient.token()`, calls `getOwnerEquipments(email, token)` from `lib/api/equipments.ts`, and shows name/brand, category, price, rental type, status, and view/edit/delete actions. View routes to `/dashboard/owner/equipment/[id]` (the detail page does not exist yet); edit opens a modal with every listing field and calls `updateEquipments`; delete opens a confirm modal and calls `deleteEquipments` (both in `lib/actions/equipments.ts`). The backend routes are `PATCH`/`DELETE /equipments/my-equipments/:id`; restart the backend after editing them.
+- `app/dashboard/profile/page.tsx` is the shared "My Profile" page (client) for every role: gets a JWT with `authClient.token()`, calls `getProfile(token)` from `lib/api/profile.ts`, and shows name, email, role, phone, date of birth, and address. "Edit profile" opens a modal that patches name/phone/address/dateOfBirth with `updateProfile` from `lib/actions/profile.ts` (`PATCH /users/my-profile`).
+
+### Public equipment
+
+- `lib/api/equipments.ts` holds the public fetches: `getEquipments(filters)` builds `?category=&location=&rentalType=&condition=&brand=` from defined values, and `getEquipmentById(id)` reads `/equipments/:id`. Both use `cache: "no-store"`. `getOwnerEquipments(email, token)` is the authenticated owner fetch.
+- `app/equipments/page.tsx` is a server component that wraps the client `components/Equipments/EquipmentsList.tsx` in `<Suspense>` (required because the client list calls `useSearchParams`).
+- `components/Equipments/EquipmentsList.tsx` renders radio filter groups for category, rental type, and condition. Selecting a radio writes the query param with `router.replace` (deleting it for "All"), and the component refetches from the URL. The effect depends on the individual `searchParams.get(...)` string values, not the `searchParams` object — using the object causes an endless refetch loop because its identity changes.
+- `app/equipments/[id]/page.tsx` is a server component: awaits `params`, calls `getEquipmentById`, and `notFound()`s on an invalid/missing id. It shows the image, price, specs, owner, description, and rental terms.
+- The public `GET /equipments` backend route does not filter by `status`, so pending listings are currently visible too.
 
 ## Conventions
 

@@ -53,7 +53,7 @@ function getInitials(name?: string | null) {
 
 export default function AddEquipmentPage() {
   const router = useRouter()
-    
+
   const { data: session } = authClient.useSession()
   const owner = session?.user
   const role = owner?.role
@@ -139,39 +139,34 @@ export default function AddEquipmentPage() {
       },
     }
 
-    const {data,error} = await authClient.token()
+    const { data, error } = await authClient.token()
     console.log(data)
-    const token = data?.token as string;
+    const token = data?.token as string
     try {
-        const result= await createListing(equipment, token)
-        if (!result) {
-            toast.add({
-                title: "Something went wrong",
-                description: "Please try again.",
-                type: "error",
-            })
-            return
-        }
-        router.push(`/dashboard/${role}`)
-        router.refresh()
+      const result = await createListing(equipment, token)
+      if (!result) {
         toast.add({
-            title: "Equipment logged",
-            description: "The listing payload is in the console.",
-            type: "success",
-        })
-    
-    } catch (error) {
-        toast.add({
-            title: "Something went wrong",
-            description: "Please try again.",
-            type: "error",
+          title: "Something went wrong",
+          description: "Please try again.",
+          type: "error",
         })
         return
+      }
+      router.push(`/dashboard/${role}`)
+      router.refresh()
+      toast.add({
+        title: "Equipment logged",
+        description: "The listing payload is in the console.",
+        type: "success",
+      })
+    } catch (error) {
+      toast.add({
+        title: "Something went wrong",
+        description: "Please try again.",
+        type: "error",
+      })
+      return
     }
-
-    
-
-    
   }
 
   return (
@@ -281,7 +276,7 @@ export default function AddEquipmentPage() {
 
           <div className="space-y-2">
             <Label htmlFor="price">
-              Rental price <span className="text-destructive">*</span>
+              Rental price (BDT) <span className="text-destructive">*</span>
             </Label>
             <Input
               id="price"

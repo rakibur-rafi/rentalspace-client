@@ -69,7 +69,7 @@ const textareaClassName =
 function formatPrice(value: number) {
   return new Intl.NumberFormat("en-US", {
     style: "currency",
-    currency: "USD",
+    currency: "BDT",
   }).format(value || 0)
 }
 
@@ -442,9 +442,7 @@ export default function MyEquipmentPage() {
                           size="icon-sm"
                           aria-label={`View ${equipment.name}`}
                           onClick={() =>
-                            router.push(
-                              `/dashboard/owner/equipment/${equipment._id}`
-                            )
+                            router.push(`/equipments/${equipment._id}`)
                           }
                         >
                           <Eye className="size-4" aria-hidden="true" />
@@ -535,7 +533,7 @@ export default function MyEquipmentPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="edit-price">Rental price</Label>
+                <Label htmlFor="edit-price">Rental price (BDT)</Label>
                 <Input
                   id="edit-price"
                   name="rentalPrice"
