@@ -19,7 +19,7 @@ export type VerifiedOwner = {
 }
 
 export const getUsers = async (token: string): Promise<AdminUser[]> => {
-  const res = await fetch(`${BASE_URL}/users`, {
+  const res = await fetch(`${BASE_URL}/users/all-users`, {
     method: "GET",
     headers: { Authorization: `Bearer ${token}` },
     cache: "no-store",

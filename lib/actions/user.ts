@@ -7,7 +7,7 @@ export const updateUserRole = async (
   role: UserRole,
   token: string
 ) => {
-  const res = await fetch(`${BASE_URL}/users/${id}`, {
+  const res = await fetch(`${BASE_URL}/users/all-users/${id}`, {
     method: "PATCH",
     headers: {
       "Content-Type": "application/json",
