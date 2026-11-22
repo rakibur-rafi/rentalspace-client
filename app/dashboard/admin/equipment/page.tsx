@@ -2,7 +2,8 @@
 
 import { useEffect, useMemo, useState } from "react"
 import Image from "next/image"
-import { Check, Package, Search, Trash2, X } from "lucide-react"
+import { Check, Eye, Package, Search, Trash2, X } from "lucide-react"
+import { useRouter } from "next/navigation"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -60,6 +61,7 @@ function statusColor(status?: string) {
 }
 
 export default function AdminEquipmentPage() {
+  const router = useRouter()
   const [equipments, setEquipments] = useState<Equipment[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
@@ -216,13 +218,31 @@ export default function AdminEquipmentPage() {
         </div>
 
         {loading ? (
-          <div className="space-y-3 p-5" aria-label="Loading equipment">
-            {[1, 2, 3].map((item) => (
-              <div
-                key={item}
-                className="h-14 animate-pulse rounded-lg bg-muted"
-              />
-            ))}
+          <div role="status" className="overflow-x-auto">
+            <span className="sr-only">Loading equipment</span>
+            <table className="w-full min-w-[900px]">
+              <tbody>
+                {[0, 1, 2, 3, 4].map((row) => (
+                  <tr key={row} className="border-b last:border-0">
+                    {[
+                      "w-40",
+                      "w-20",
+                      "w-28",
+                      "w-24",
+                      "w-20",
+                      "w-24",
+                      "w-28",
+                    ].map((width, cell) => (
+                        <td key={cell} className="px-4 py-4">
+                          <div
+                            className={`h-4 ${width} animate-pulse rounded bg-muted`}
+                          />
+                        </td>
+                      ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         ) : error ? (
           <p
@@ -343,6 +363,18 @@ export default function AdminEquipmentPage() {
                           onClick={() => void handleDelete(equipment)}
                         >
                           <Trash2 aria-hidden="true" />
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="icon-sm"
+                          aria-label={`View ${equipment.name || "equipment"}`}
+                          title="View equipment"
+                          onClick={() =>
+                            router.push(`/equipments/${equipment._id}`)
+                          }
+                        >
+                          <Eye aria-hidden="true" />
                         </Button>
                       </div>
                     </td>

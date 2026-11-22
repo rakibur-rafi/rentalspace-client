@@ -182,13 +182,23 @@ export default function AdminUsersPage() {
         </div>
 
         {loading ? (
-          <div className="space-y-3 p-5" aria-label="Loading users">
-            {[1, 2, 3].map((item) => (
-              <div
-                key={item}
-                className="h-14 animate-pulse rounded-lg bg-muted"
-              />
-            ))}
+          <div role="status" className="overflow-x-auto">
+            <span className="sr-only">Loading users</span>
+            <table className="w-full min-w-[640px]">
+              <tbody>
+                {[0, 1, 2, 3, 4].map((row) => (
+                  <tr key={row} className="border-b last:border-0">
+                    {["w-36", "w-48", "w-20"].map((width, cell) => (
+                      <td key={cell} className="px-5 py-4">
+                        <div
+                          className={`h-4 ${width} animate-pulse rounded bg-muted`}
+                        />
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         ) : error ? (
           <div className="flex flex-col items-center gap-3 px-5 py-14 text-center">

@@ -56,6 +56,7 @@ export default function AddEquipmentPage() {
   const [imageUrl, setImageUrl] = useState("")
   const [uploading, setUploading] = useState(false)
   const [categories, setCategories] = useState<string[]>([])
+  const [categoriesLoading, setCategoriesLoading] = useState(true)
 
   useEffect(() => {
     let active = true
@@ -72,6 +73,9 @@ export default function AddEquipmentPage() {
             type: "error",
           })
         }
+      })
+      .finally(() => {
+        if (active) setCategoriesLoading(false)
       })
 
     return () => {
@@ -249,9 +253,21 @@ export default function AddEquipmentPage() {
             <Label htmlFor="category">
               Category <span className="text-destructive">*</span>
             </Label>
-            <Select id="category" name="category" defaultValue="" required>
+            <Select
+              id="category"
+              name="category"
+              defaultValue=""
+              required
+              disabled={categoriesLoading || categories.length === 0}
+            >
               <SelectTrigger id="category">
-                <SelectValue placeholder="Select a category" />
+                <SelectValue
+                  placeholder={
+                    categoriesLoading
+                      ? "Loading categories…"
+                      : "Select a category"
+                  }
+                />
               </SelectTrigger>
               <SelectContent>
                 {categories.map((category) => (

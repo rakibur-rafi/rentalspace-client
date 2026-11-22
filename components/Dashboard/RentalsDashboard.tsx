@@ -239,7 +239,29 @@ export default function RentalsDashboard({ view }: { view: View }) {
       </div>
 
       {loading ? (
-        <div className="h-52 animate-pulse rounded-2xl border bg-card" />
+        <div
+          role="status"
+          aria-label="Loading rentals"
+          className="overflow-x-auto rounded-2xl border bg-card"
+        >
+          <table className="w-full min-w-[760px]">
+            <tbody>
+              {[0, 1, 2, 3, 4].map((row) => (
+                <tr key={row} className="border-b last:border-0">
+                  {["w-40", "w-24", "w-20", "w-24", "w-24"].map(
+                    (width, cell) => (
+                      <td key={cell} className="px-4 py-5">
+                        <div
+                          className={`h-4 ${width} animate-pulse rounded bg-muted`}
+                        />
+                      </td>
+                    )
+                  )}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       ) : error ? (
         <div className="flex flex-col items-center gap-3 rounded-2xl border bg-card px-5 py-16 text-center">
           <p className="text-sm text-muted-foreground">{error}</p>

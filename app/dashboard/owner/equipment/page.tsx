@@ -102,7 +102,9 @@ function Modal({
       role="dialog"
       aria-modal="true"
       aria-label={title}
-      onClick={onClose}
+      onClick={(event) => {
+        if (event.target === event.currentTarget) onClose()
+      }}
       className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 p-4 sm:items-center"
     >
       <div
@@ -353,15 +355,47 @@ export default function MyEquipmentPage() {
         </Link>
       </div>
 
-      <div className="overflow-hidden rounded-2xl border bg-card">
+      <div
+        className="overflow-hidden rounded-2xl border bg-card"
+        aria-busy={loading}
+        aria-label={loading ? "Loading your equipment" : undefined}
+      >
         {loading ? (
-          <div className="space-y-3 p-5">
-            {[0, 1, 2, 3].map((row) => (
-              <div
-                key={row}
-                className="h-14 animate-pulse rounded-xl bg-muted"
-              />
-            ))}
+          <div role="status" className="overflow-x-auto">
+            <span className="sr-only">Loading your equipment</span>
+            <table className="w-full min-w-[700px] text-sm">
+              <thead className="border-b bg-muted/40 text-left text-xs tracking-wide text-muted-foreground uppercase">
+                <tr>
+                  {[
+                    "Equipment",
+                    "Category",
+                    "Price",
+                    "Rental type",
+                    "Status",
+                    "Actions",
+                  ].map((heading) => (
+                    <th key={heading} className="px-4 py-3 font-medium">
+                      {heading}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {[0, 1, 2, 3, 4].map((row) => (
+                  <tr key={row} className="border-b last:border-0">
+                    {["w-40", "w-20", "w-16", "w-16", "w-16", "w-20"].map(
+                      (width, cell) => (
+                        <td key={cell} className="px-4 py-4">
+                          <div
+                            className={`h-4 ${width} animate-pulse rounded bg-muted`}
+                          />
+                        </td>
+                      )
+                    )}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         ) : error ? (
           <p className="px-5 py-16 text-center text-sm text-muted-foreground">

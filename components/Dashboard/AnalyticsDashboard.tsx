@@ -278,7 +278,18 @@ export default function AnalyticsDashboard({
         </div>
       ) : null}
       {loading ? (
-        <p className="text-sm text-muted-foreground">Loading analytics…</p>
+        <div role="status" className="space-y-5">
+          <span className="sr-only">Loading analytics</span>
+          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+            {[0, 1, 2, 3].map((item) => (
+              <div
+                key={item}
+                className="h-28 animate-pulse rounded-2xl border bg-card"
+              />
+            ))}
+          </div>
+          <div className="h-80 animate-pulse rounded-2xl border bg-card" />
+        </div>
       ) : null}
 
       {ownerData ? (
