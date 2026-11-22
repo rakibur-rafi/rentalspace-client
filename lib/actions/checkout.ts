@@ -5,6 +5,7 @@ export type CheckoutPayload = {
   quantity: number
   phone: string
   address: string
+  additionalNotes: string
   totalPrice: number
   rentalType: string
   rentStartDate: string

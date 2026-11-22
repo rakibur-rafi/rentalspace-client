@@ -30,8 +30,12 @@ type Equipment = {
   rentalPrice?: number
   rentalType?: string
   status?: string
-  ownerEmail?: string
   image?: string
+  owner?: {
+    email?: string,
+    name?:string,
+    image?: string
+  }
 }
 
 function formatPrice(value?: number) {
@@ -84,7 +88,7 @@ export default function AdminEquipmentPage() {
     if (!search) return equipments
     return equipments.filter((equipment) =>
       [equipment.name, equipment.brand, equipment.model, equipment.category,
-        equipment.location, equipment.ownerEmail]
+        equipment.location, equipment.owner?.email]
         .some((value) => value?.toLowerCase().includes(search))
     )
   }, [equipments, query])
@@ -226,7 +230,7 @@ export default function AdminEquipmentPage() {
                     </td>
                     <td className="px-4 py-3">{equipment.category || "—"}</td>
                     <td className="px-4 py-3 text-muted-foreground">
-                      {equipment.ownerEmail || "—"}
+                      {equipment.owner?.email}
                     </td>
                     <td className="px-4 py-3">{equipment.location || "—"}</td>
                     <td className="px-4 py-3 font-medium">

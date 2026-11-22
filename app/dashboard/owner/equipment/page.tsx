@@ -34,6 +34,7 @@ import { toast } from "@/components/ui/toast"
 import { deleteEquipments, updateEquipments } from "@/lib/actions/equipments"
 import { uploadImage } from "@/lib/actions/image"
 import { getOwnerEquipments } from "@/lib/api/equipments"
+import { getCategories } from "@/lib/api/categories"
 import { authClient } from "@/lib/auth-client"
 
 type Equipment = {
@@ -52,16 +53,6 @@ type Equipment = {
   rentalTerms: string
   status: string
 }
-
-const categories = [
-  "Power Tools",
-  "Heavy Equipment",
-  "Lawn & Garden",
-  "Construction",
-  "Event & Party",
-  "Cleaning",
-  "Automotive",
-]
 
 const conditions = ["New", "Excellent", "Good", "Fair"]
 
@@ -157,6 +148,23 @@ export default function MyEquipmentPage() {
   const [editImage, setEditImage] = useState("")
   const [uploading, setUploading] = useState(false)
   const [saving, setSaving] = useState(false)
+  const [categories, setCategories] = useState<string[]>([])
+
+  useEffect(() => {
+    let active = true
+
+    getCategories()
+      .then((result) => {
+        if (active) setCategories(result)
+      })
+      .catch(() => {
+        if (active) setCategories([])
+      })
+
+    return () => {
+      active = false
+    }
+  }, [])
 
   useEffect(() => {
     if (!email) return
@@ -508,13 +516,13 @@ export default function MyEquipmentPage() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                  {[...new Set([editing.category, ...categories])].map(
-                    (category) => (
-                      <SelectItem key={category} value={category}>
-                        {category}
-                      </SelectItem>
-                    )
-                  )}
+                    {[...new Set([editing.category, ...categories])].map(
+                      (category) => (
+                        <SelectItem key={category} value={category}>
+                          {category}
+                        </SelectItem>
+                      )
+                    )}
                   </SelectContent>
                 </Select>
               </div>
@@ -569,11 +577,11 @@ export default function MyEquipmentPage() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                  {rentalTypes.map((type) => (
-                    <SelectItem key={type} value={type}>
-                      {capitalize(type)}
-                    </SelectItem>
-                  ))}
+                    {rentalTypes.map((type) => (
+                      <SelectItem key={type} value={type}>
+                        {capitalize(type)}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
@@ -602,13 +610,13 @@ export default function MyEquipmentPage() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                  {[...new Set([editing.condition, ...conditions])].map(
-                    (condition) => (
-                      <SelectItem key={condition} value={condition}>
-                        {condition}
-                      </SelectItem>
-                    )
-                  )}
+                    {[...new Set([editing.condition, ...conditions])].map(
+                      (condition) => (
+                        <SelectItem key={condition} value={condition}>
+                          {condition}
+                        </SelectItem>
+                      )
+                    )}
                   </SelectContent>
                 </Select>
               </div>

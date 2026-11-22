@@ -135,6 +135,7 @@ export default function CheckoutForm({
       quantity: selectedQuantity,
       phone: String(formData.get("phone") ?? "").trim(),
       address: String(formData.get("address") ?? "").trim(),
+      additionalNotes: String(formData.get("additionalNotes") ?? "").trim(),
       totalPrice: rentalPrice * selectedQuantity,
       rentalType,
       rentStartDate,
@@ -252,6 +253,16 @@ export default function CheckoutForm({
           className="min-h-24 w-full rounded-md border border-input bg-transparent px-2.5 py-2 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 dark:bg-input/30"
           placeholder="Street, city, country"
           required
+        />
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="additionalNotes">Additional Notes</Label>
+        <textarea
+          id="additionalNotes"
+          name="additionalNotes"
+          className="min-h-24 w-full rounded-md border border-input bg-transparent px-2.5 py-2 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 dark:bg-input/30"
+          placeholder="Anything else we should know?"
         />
       </div>
 

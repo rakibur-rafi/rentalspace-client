@@ -88,7 +88,10 @@ export default function RentalsDashboard({ view }: { view: View }) {
 
           if (equipmentLinkId && !rental.equipment?.name) {
             try {
-              const equipment = await getEquipmentById(equipmentLinkId)
+              const equipment = await getEquipmentById(
+                equipmentLinkId,
+                data.token
+              )
               equipmentName = equipment.name ?? equipmentName
               equipmentImage = equipment.image ?? equipmentImage
             } catch {
@@ -232,7 +235,6 @@ export default function RentalsDashboard({ view }: { view: View }) {
                   <th className="px-4 py-3 font-medium">Owner</th>
                 ) : null}
                 <th className="px-4 py-3 font-medium">Booked</th>
-                <th className="px-4 py-3 font-medium">Quantity</th>
                 <th className="px-4 py-3 font-medium">Total</th>
                 <th className="px-4 py-3 font-medium">
                   {view === "owner" ? "Update status" : "Status"}
@@ -274,7 +276,6 @@ export default function RentalsDashboard({ view }: { view: View }) {
                   <td className="px-4 py-3">
                     {formatDate(rental.checkoutDate)}
                   </td>
-                  <td className="px-4 py-3">{rental.quantity ?? 1}</td>
                   <td className="px-4 py-3 font-medium">
                     {formatPrice(rental.totalPrice)}
                   </td>
@@ -302,11 +303,11 @@ export default function RentalsDashboard({ view }: { view: View }) {
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                        {rentalStatuses.map((status) => (
-                          <SelectItem key={status} value={status}>
-                            {status}
-                          </SelectItem>
-                        ))}
+                          {rentalStatuses.map((status) => (
+                            <SelectItem key={status} value={status}>
+                              {status}
+                            </SelectItem>
+                          ))}
                         </SelectContent>
                       </Select>
                     ) : (

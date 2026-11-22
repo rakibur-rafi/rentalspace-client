@@ -1,11 +1,13 @@
 import Image from "next/image"
 import Link from "next/link"
-import { notFound } from "next/navigation"
+import { notFound, redirect } from "next/navigation"
+import { headers } from "next/headers"
 import { ArrowLeft, MapPin, Package } from "lucide-react"
 
 import { buttonVariants } from "@/components/ui/button"
 import FavoriteButton from "@/components/Equipments/FavoriteButton"
 import RentNowButton from "@/components/Equipments/RentNowButton"
+import { auth } from "@/lib/auth"
 import { getEquipmentById } from "@/lib/api/equipments"
 
 type Equipment = {
@@ -42,11 +44,21 @@ export default async function EquipmentDetailPage({
   params: Promise<{ id: string }>
 }) {
   const { id } = await params
+  let token = ""
+
+  try {
+    const result = await auth.api.getToken({ headers: await headers() })
+    token = result.token
+  } catch {}
+
+  if (!token) {
+    redirect(`/login?returnTo=${encodeURIComponent(`/equipments/${id}`)}`)
+  }
 
   let equipment: Equipment | null = null
 
   try {
-    equipment = await getEquipmentById(id)
+    equipment = await getEquipmentById(id, token)
   } catch {
     notFound()
   }

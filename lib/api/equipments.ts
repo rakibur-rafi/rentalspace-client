@@ -6,6 +6,12 @@ type EquipmentFilters = {
   rentalType?: string
   condition?: string
   brand?: string
+  search?: string
+  searchBy?: string
+  minPrice?: string
+  maxPrice?: string
+  availability?: string
+  sort?: string
 }
 
 export const getEquipments = async (filters: EquipmentFilters = {}) => {
@@ -29,8 +35,11 @@ export const getEquipments = async (filters: EquipmentFilters = {}) => {
   return res.json()
 }
 
-export const getEquipmentById = async (id: string) => {
+export const getEquipmentById = async (id: string, token: string) => {
   const res = await fetch(`${BASE_URL}/equipments/${id}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
     cache: "no-store",
   })
 

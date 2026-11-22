@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, type ChangeEvent, type FormEvent } from "react"
+import { useEffect, useState, type ChangeEvent, type FormEvent } from "react"
 import Image from "next/image"
 import { Camera, User } from "lucide-react"
 
@@ -18,17 +18,8 @@ import { toast } from "@/components/ui/toast"
 import { uploadImage } from "@/lib/actions/image"
 import { authClient } from "@/lib/auth-client"
 import { createListing } from "@/lib/actions/equipments"
+import { getCategories } from "@/lib/api/categories"
 import { useRouter } from "next/navigation"
-
-const categories = [
-  "Power Tools",
-  "Heavy Equipment",
-  "Lawn & Garden",
-  "Construction",
-  "Event & Party",
-  "Cleaning",
-  "Automotive",
-]
 
 const conditions = ["New", "Excellent", "Good", "Fair"]
 
@@ -64,6 +55,29 @@ export default function AddEquipmentPage() {
 
   const [imageUrl, setImageUrl] = useState("")
   const [uploading, setUploading] = useState(false)
+  const [categories, setCategories] = useState<string[]>([])
+
+  useEffect(() => {
+    let active = true
+
+    getCategories()
+      .then((result) => {
+        if (active) setCategories(result)
+      })
+      .catch(() => {
+        if (active) {
+          toast.add({
+            title: "Categories could not load",
+            description: "Refresh the page and try again.",
+            type: "error",
+          })
+        }
+      })
+
+    return () => {
+      active = false
+    }
+  }, [])
 
   async function handleImageUpload(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0]
@@ -235,21 +249,16 @@ export default function AddEquipmentPage() {
             <Label htmlFor="category">
               Category <span className="text-destructive">*</span>
             </Label>
-            <Select
-              id="category"
-              name="category"
-              defaultValue=""
-              required
-            >
+            <Select id="category" name="category" defaultValue="" required>
               <SelectTrigger id="category">
                 <SelectValue placeholder="Select a category" />
               </SelectTrigger>
               <SelectContent>
-              {categories.map((category) => (
-                <SelectItem key={category} value={category}>
-                  {category}
-                </SelectItem>
-              ))}
+                {categories.map((category) => (
+                  <SelectItem key={category} value={category}>
+                    {category}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
@@ -308,11 +317,11 @@ export default function AddEquipmentPage() {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-              {rentalTypes.map((type) => (
-                <SelectItem key={type.value} value={type.value}>
-                  {type.label}
-                </SelectItem>
-              ))}
+                {rentalTypes.map((type) => (
+                  <SelectItem key={type.value} value={type.value}>
+                    {type.label}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
@@ -335,21 +344,16 @@ export default function AddEquipmentPage() {
             <Label htmlFor="condition">
               Equipment condition <span className="text-destructive">*</span>
             </Label>
-            <Select
-              id="condition"
-              name="condition"
-              defaultValue=""
-              required
-            >
+            <Select id="condition" name="condition" defaultValue="" required>
               <SelectTrigger id="condition">
                 <SelectValue placeholder="Select a condition" />
               </SelectTrigger>
               <SelectContent>
-              {conditions.map((condition) => (
-                <SelectItem key={condition} value={condition}>
-                  {condition}
-                </SelectItem>
-              ))}
+                {conditions.map((condition) => (
+                  <SelectItem key={condition} value={condition}>
+                    {condition}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>

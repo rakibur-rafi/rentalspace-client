@@ -16,6 +16,7 @@ import { toast } from "@/components/ui/toast"
 import { updateUserRole } from "@/lib/actions/user"
 import { getUsers, type AdminUser, type UserRole } from "@/lib/api/users"
 import { authClient } from "@/lib/auth-client"
+import Image from "next/image"
 
 const roles: UserRole[] = ["customer", "owner", "admin"]
 
@@ -199,7 +200,9 @@ export default function AdminUsersPage() {
                 <tr>
                   <th className="px-5 py-3 font-medium">User</th>
                   <th className="px-5 py-3 font-medium">Email</th>
-                  <th className="px-5 py-3 text-right font-medium">Role</th>
+                  <th className="px-5 py-3 text-left font-medium">
+                    Role
+                  </th>
                 </tr>
               </thead>
               <tbody className="divide-y">
@@ -208,10 +211,11 @@ export default function AdminUsersPage() {
                     <td className="px-5 py-3">
                       <div className="flex items-center gap-3">
                         {user.image ? (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img
+                          <Image
                             src={user.image}
                             alt=""
+                            width={10}
+                            height={10}
                             className="size-10 rounded-full border object-cover"
                           />
                         ) : (
@@ -227,7 +231,7 @@ export default function AdminUsersPage() {
                     <td className="px-5 py-3 text-muted-foreground">
                       {user.email}
                     </td>
-                    <td className="px-5 py-3 text-right">
+                    <td className="px-5 py-3">
                       <Select
                         value={user.role}
                         disabled={updatingId === user._id}

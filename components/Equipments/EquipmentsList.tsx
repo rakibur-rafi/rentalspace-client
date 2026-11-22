@@ -1,51 +1,27 @@
 "use client"
 
-import { useEffect, useState } from "react"
-import Image from "next/image"
-import Link from "next/link"
+import { useEffect, useState, type FormEvent } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
-import { MapPin, Package, SlidersHorizontal } from "lucide-react"
+import {
+  ChevronDown,
+  ChevronUp,
+  Package,
+  Search,
+  SlidersHorizontal,
+} from "lucide-react"
 
 import { Button } from "@/components/ui/button"
-import FavoriteButton from "@/components/Equipments/FavoriteButton"
+import { Input } from "@/components/ui/input"
+import EquipmentCard, {
+  type EquipmentCardData,
+} from "@/components/Equipments/EquipmentCard"
+import { getCategories } from "@/lib/api/categories"
 import { getEquipments } from "@/lib/api/equipments"
 import { getFavourites } from "@/lib/api/favourites"
 import { authClient } from "@/lib/auth-client"
 import { cn } from "@/lib/utils"
 
-type Equipment = {
-  _id: string
-  name: string
-  category: string
-  location: string
-  rentalPrice: number
-  rentalType: string
-  condition: string
-  brand?: string
-  model?: string
-  image?: string
-}
-
-const categories = [
-  "Power Tools",
-  "Heavy Equipment",
-  "Lawn & Garden",
-  "Construction",
-  "Event & Party",
-  "Cleaning",
-  "Automotive",
-]
-
 const rentalTypes = ["daily", "weekly", "monthly"]
-
-const conditions = ["New", "Excellent", "Good", "Fair"]
-
-function formatPrice(value: number) {
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "BDT",
-  }).format(value || 0)
-}
 
 function capitalize(value?: string) {
   if (!value) return ""
@@ -100,60 +76,6 @@ function FilterGroup({
   )
 }
 
-function EquipmentCard({
-  equipment,
-  initiallySaved,
-}: {
-  equipment: Equipment
-  initiallySaved: boolean
-}) {
-  return (
-    <article className="group relative overflow-hidden rounded-2xl border bg-card transition-shadow hover:shadow-md">
-      <div className="absolute top-3 right-3 z-10">
-        <FavoriteButton equipment={equipment} initiallySaved={initiallySaved} />
-      </div>
-      <Link href={`/equipments/${equipment._id}`} className="block">
-        <div className="relative h-44 overflow-hidden bg-muted">
-          {equipment.image ? (
-            <Image
-              src={equipment.image}
-              alt={equipment.name}
-              fill
-              sizes="(min-width: 1280px) 25vw, (min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
-              className="object-cover transition-transform duration-500 group-hover:scale-105"
-            />
-          ) : (
-            <span className="flex h-full items-center justify-center text-muted-foreground">
-              <Package className="size-8" aria-hidden="true" />
-            </span>
-          )}
-          <span className="absolute top-3 left-3 rounded-full bg-background/90 px-2.5 py-1 text-xs font-medium backdrop-blur">
-            {equipment.category}
-          </span>
-        </div>
-
-        <div className="p-4">
-          <p className="truncate font-medium">{equipment.name}</p>
-          <p className="mt-0.5 truncate text-xs text-muted-foreground">
-            {[equipment.brand, equipment.model].filter(Boolean).join(" ") ||
-              equipment.condition}
-          </p>
-          <p className="mt-2 flex items-center gap-1 text-xs text-muted-foreground">
-            <MapPin className="size-3.5 shrink-0" aria-hidden="true" />
-            <span className="truncate">{equipment.location}</span>
-          </p>
-          <p className="mt-3 text-sm font-semibold">
-            {formatPrice(equipment.rentalPrice)}
-            <span className="ml-1 text-xs font-normal text-muted-foreground">
-              / {equipment.rentalType}
-            </span>
-          </p>
-        </div>
-      </Link>
-    </article>
-  )
-}
-
 export function EquipmentsList() {
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -164,14 +86,48 @@ export function EquipmentsList() {
   const rentalType = searchParams.get("rentalType")
   const condition = searchParams.get("condition")
   const brand = searchParams.get("brand")
+  const search = searchParams.get("search")?.trim() ?? ""
+  const searchBy = searchParams.get("searchBy") ?? "name"
+  const sort = searchParams.get("sort") ?? "recently-added"
+  const minPrice = searchParams.get("minPrice") ?? ""
+  const maxPrice = searchParams.get("maxPrice") ?? ""
+  const availability = searchParams.get("availability") ?? ""
   const hasFilters = Boolean(
-    category || rentalType || condition || location || brand
+    category ||
+    rentalType ||
+    condition ||
+    location ||
+    brand ||
+    minPrice ||
+    maxPrice ||
+    availability
+  )
+  const hasActiveQuery = Boolean(
+    hasFilters || search || (sort && sort !== "recently-added")
   )
 
-  const [equipments, setEquipments] = useState<Equipment[]>([])
+  const [equipments, setEquipments] = useState<EquipmentCardData[]>([])
+  const [categories, setCategories] = useState<string[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
   const [favoriteIds, setFavoriteIds] = useState<Set<string>>(new Set())
+  const [showControls, setShowControls] = useState(false)
+
+  useEffect(() => {
+    let active = true
+
+    getCategories()
+      .then((result) => {
+        if (active) setCategories(result)
+      })
+      .catch(() => {
+        if (active) setCategories([])
+      })
+
+    return () => {
+      active = false
+    }
+  }, [])
 
   useEffect(() => {
     if (!session || (session.user.role ?? "").toLowerCase() !== "customer") {
@@ -216,6 +172,12 @@ export function EquipmentsList() {
           rentalType: rentalType ?? undefined,
           condition: condition ?? undefined,
           brand: brand ?? undefined,
+          search: search || undefined,
+          searchBy: search ? searchBy : undefined,
+          minPrice: minPrice || undefined,
+          maxPrice: maxPrice || undefined,
+          availability: availability || undefined,
+          sort: sort || undefined,
         })
 
         if (active) {
@@ -237,7 +199,19 @@ export function EquipmentsList() {
     return () => {
       active = false
     }
-  }, [category, location, rentalType, condition, brand])
+  }, [
+    category,
+    location,
+    rentalType,
+    condition,
+    brand,
+    search,
+    searchBy,
+    minPrice,
+    maxPrice,
+    availability,
+    sort,
+  ])
 
   function updateFilter(key: string, value: string) {
     const params = new URLSearchParams(searchParams.toString())
@@ -258,6 +232,47 @@ export function EquipmentsList() {
     router.replace("/equipments", { scroll: false })
   }
 
+  function submitSearch(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    const formData = new FormData(event.currentTarget)
+    const value = String(formData.get("search") ?? "").trim()
+    const by = String(formData.get("searchBy") ?? "name")
+    const params = new URLSearchParams(searchParams.toString())
+
+    if (value) {
+      params.set("search", value)
+      params.set("searchBy", by)
+    } else {
+      params.delete("search")
+      params.delete("searchBy")
+    }
+
+    const query = params.toString()
+    router.replace(query ? `/equipments?${query}` : "/equipments", {
+      scroll: false,
+    })
+  }
+
+  function submitPriceRange(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    const formData = new FormData(event.currentTarget)
+    const min = String(formData.get("minPrice") ?? "").trim()
+    const max = String(formData.get("maxPrice") ?? "").trim()
+    const params = new URLSearchParams(searchParams.toString())
+
+    if (min) params.set("minPrice", min)
+    else params.delete("minPrice")
+    if (max) params.set("maxPrice", max)
+    else params.delete("maxPrice")
+
+    const query = params.toString()
+    router.replace(query ? `/equipments?${query}` : "/equipments", {
+      scroll: false,
+    })
+  }
+
+  const visibleEquipments = equipments
+
   return (
     <section className="mx-auto w-full max-w-7xl space-y-6 px-4 py-8 sm:px-6 lg:px-8">
       <div className="flex flex-wrap items-end justify-between gap-4">
@@ -269,46 +284,184 @@ export function EquipmentsList() {
             Browse gear from vendors near you.
           </p>
         </div>
-        {hasFilters ? (
+        {hasActiveQuery ? (
           <Button
             type="button"
             variant="outline"
             className="rounded-full"
             onClick={clearFilters}
           >
-            Clear filters
+            Clear all
           </Button>
         ) : null}
       </div>
 
-      <div className="rounded-2xl border bg-card p-5">
-        <div className="flex items-center gap-2 text-sm font-medium">
+      <div>
+        <Button
+          type="button"
+          variant="outline"
+          aria-expanded={showControls}
+          aria-controls="equipment-controls"
+          onClick={() => setShowControls((visible) => !visible)}
+          className="h-10 gap-2 rounded-full px-4"
+        >
           <SlidersHorizontal className="size-4" aria-hidden="true" />
           Filters
-        </div>
-        <div className="mt-4 grid gap-5 lg:grid-cols-3">
-          <FilterGroup
-            legend="Category"
-            name="category"
-            options={categories}
-            value={category}
-            onChange={(value) => updateFilter("category", value)}
-          />
-          <FilterGroup
-            legend="Rental type"
-            name="rentalType"
-            options={rentalTypes}
-            value={rentalType}
-            onChange={(value) => updateFilter("rentalType", value)}
-          />
-          <FilterGroup
-            legend="Condition"
-            name="condition"
-            options={conditions}
-            value={condition}
-            onChange={(value) => updateFilter("condition", value)}
-          />
-        </div>
+          {hasFilters && (
+            <span
+              className="size-2 rounded-full bg-primary"
+              aria-hidden="true"
+            />
+          )}
+          {showControls ? (
+            <ChevronUp className="size-4" aria-hidden="true" />
+          ) : (
+            <ChevronDown className="size-4" aria-hidden="true" />
+          )}
+        </Button>
+
+        <form
+          key={`${searchBy}:${search}`}
+          onSubmit={submitSearch}
+          className="mt-4 grid gap-4 rounded-2xl border bg-card p-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-end sm:p-5"
+        >
+          <div className="space-y-3">
+            <label htmlFor="equipment-search" className="text-sm font-medium">
+              Search equipment
+            </label>
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+              <div className="relative min-w-0 flex-1">
+                <Search
+                  className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground"
+                  aria-hidden="true"
+                />
+                <Input
+                  id="equipment-search"
+                  name="search"
+                  defaultValue={search}
+                  placeholder={
+                    searchBy === "location"
+                      ? "Search by city or area"
+                      : "Search by equipment name"
+                  }
+                  className="h-10 bg-background pl-10"
+                />
+              </div>
+              <fieldset className="shrink-0">
+                <legend className="sr-only">Search by</legend>
+                <div className="inline-flex flex-wrap gap-2">
+                  {[
+                    ["name", "Equipment Name"],
+                    ["location", "Location"],
+                  ].map(([value, label]) => (
+                    <label
+                      key={value}
+                      className="cursor-pointer rounded-full border bg-background px-3 py-2 text-sm transition-colors hover:bg-muted has-[:checked]:border-primary has-[:checked]:bg-primary has-[:checked]:text-primary-foreground"
+                    >
+                      <input
+                        type="radio"
+                        name="searchBy"
+                        value={value}
+                        defaultChecked={searchBy === value}
+                        className="sr-only"
+                      />
+                      {label}
+                    </label>
+                  ))}
+                </div>
+              </fieldset>
+            </div>
+          </div>
+          <Button type="submit" className="h-10 px-6">
+            Search
+          </Button>
+        </form>
+
+        {showControls && (
+          <div
+            id="equipment-controls"
+            className="mt-3 rounded-2xl border bg-card p-5 sm:p-6"
+          >
+            <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
+              <FilterGroup
+                legend="Equipment Category"
+                name="category"
+                options={categories}
+                value={category}
+                onChange={(value) => updateFilter("category", value)}
+              />
+              <FilterGroup
+                legend="Rental Type"
+                name="rentalType"
+                options={rentalTypes}
+                value={rentalType}
+                onChange={(value) => updateFilter("rentalType", value)}
+              />
+              <fieldset>
+                <legend className="text-sm font-medium">Price Range</legend>
+                <form
+                  key={`${minPrice}:${maxPrice}`}
+                  onSubmit={submitPriceRange}
+                  className="mt-2 space-y-2"
+                >
+                  <div className="flex items-center gap-2">
+                    <Input
+                      aria-label="Minimum price"
+                      name="minPrice"
+                      type="number"
+                      min="0"
+                      placeholder="Min"
+                      defaultValue={minPrice}
+                      className="h-9 text-sm"
+                    />
+                    <span className="text-sm text-muted-foreground">to</span>
+                    <Input
+                      aria-label="Maximum price"
+                      name="maxPrice"
+                      type="number"
+                      min="0"
+                      placeholder="Max"
+                      defaultValue={maxPrice}
+                      className="h-9 text-sm"
+                    />
+                  </div>
+                  <Button type="submit" variant="outline" size="sm">
+                    Apply range
+                  </Button>
+                </form>
+              </fieldset>
+              <FilterGroup
+                legend="Availability"
+                name="availability"
+                options={["available"]}
+                value={availability}
+                onChange={(value) => updateFilter("availability", value)}
+              />
+            </div>
+          </div>
+        )}
+      </div>
+
+      <div className="flex flex-wrap items-center gap-3">
+        <span className="text-sm font-medium">Sort by</span>
+        {[
+          ["recently-added", "Recently added"],
+          ["low-to-high", "Low to high"],
+          ["high-to-low", "High to low"],
+        ].map(([value, label]) => (
+          <Button
+            key={value}
+            type="button"
+            variant={sort === value ? "secondary" : "outline"}
+            aria-pressed={sort === value}
+            onClick={() =>
+              updateFilter("sort", value === "recently-added" ? "all" : value)
+            }
+            className="rounded-full"
+          >
+            {label}
+          </Button>
+        ))}
       </div>
 
       {loading ? (
@@ -338,7 +491,7 @@ export function EquipmentsList() {
             Try again
           </Button>
         </div>
-      ) : equipments.length === 0 ? (
+      ) : visibleEquipments.length === 0 ? (
         <div className="flex flex-col items-center gap-3 rounded-2xl border bg-card px-5 py-16 text-center">
           <span className="flex size-12 items-center justify-center rounded-full bg-muted text-muted-foreground">
             <Package className="size-6" aria-hidden="true" />
@@ -346,7 +499,7 @@ export function EquipmentsList() {
           <div>
             <p className="font-medium">No equipment found</p>
             <p className="mt-1 text-sm text-muted-foreground">
-              Try a different filter or clear them to see everything.
+              Try another search or filter to see more equipment.
             </p>
           </div>
           {hasFilters ? (
@@ -363,11 +516,11 @@ export function EquipmentsList() {
       ) : (
         <>
           <p className="text-sm text-muted-foreground">
-            {equipments.length} {equipments.length === 1 ? "item" : "items"}{" "}
-            found
+            {visibleEquipments.length}{" "}
+            {visibleEquipments.length === 1 ? "item" : "items"} found
           </p>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {equipments.map((equipment) => (
+            {visibleEquipments.map((equipment) => (
               <EquipmentCard
                 key={equipment._id}
                 equipment={equipment}
