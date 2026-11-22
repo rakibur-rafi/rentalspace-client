@@ -1,11 +1,5 @@
-import React from 'react';
+import OwnerDashboardHome from "@/components/Dashboard/OwnerDashboardHome"
 
-const OwnerPage = () => {
-    return (
-        <div>
-            owner
-        </div>
-    );
-};
-
-export default OwnerPage;
+export default function OwnerPage() {
+  return <OwnerDashboardHome />
+}

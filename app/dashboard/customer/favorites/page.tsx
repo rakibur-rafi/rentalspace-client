@@ -3,11 +3,13 @@
 import { useCallback, useEffect, useState } from "react"
 import Image from "next/image"
 import Link from "next/link"
-import { Heart, Package, RotateCw } from "lucide-react"
+import { Heart, Package, RotateCw, Trash2 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { getFavourites, type Favourite } from "@/lib/api/favourites"
+import { deleteFavourite } from "@/lib/actions/favourites"
 import { authClient } from "@/lib/auth-client"
+import { toast } from "@/components/ui/toast"
 
 function formatPrice(value: number) {
   return new Intl.NumberFormat("en-US", {
@@ -21,6 +23,7 @@ export default function CustomerFavoritesPage() {
   const [favorites, setFavorites] = useState<Favourite[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
+  const [deletingId, setDeletingId] = useState<string | null>(null)
 
   const loadFavorites = useCallback(async () => {
     if (!session) return
@@ -42,6 +45,36 @@ export default function CustomerFavoritesPage() {
       setLoading(false)
     }
   }, [session])
+
+  async function handleDelete(favorite: Favourite) {
+    setDeletingId(favorite._id)
+    try {
+      const { data } = await authClient.token()
+      if (!data?.token) {
+        throw new Error("Your session expired. Please sign in again.")
+      }
+      await deleteFavourite(favorite._id, data.token)
+      setFavorites((current) =>
+        current.filter((item) => item._id !== favorite._id)
+      )
+      toast.add({
+        title: "Removed from favorites",
+        description: `${favorite.name} was removed from your favorites.`,
+        type: "success",
+      })
+    } catch (deleteError) {
+      toast.add({
+        title: "Could not remove favorite",
+        description:
+          deleteError instanceof Error
+            ? deleteError.message
+            : "Please try again.",
+        type: "error",
+      })
+    } finally {
+      setDeletingId(null)
+    }
+  }
 
   useEffect(() => {
     const timer = window.setTimeout(() => {
@@ -128,12 +161,25 @@ export default function CustomerFavoritesPage() {
                     {formatPrice(favorite.rentalPrice)} / {favorite.rentalType}
                   </td>
                   <td className="px-4 py-3 text-right">
-                    <Link
-                      href={`/equipments/${favorite.equipmentId}`}
-                      className="inline-flex h-8 items-center justify-center rounded-full border bg-background px-3 text-xs font-medium transition-colors hover:bg-muted"
-                    >
-                      View
-                    </Link>
+                    <div className="flex justify-end gap-2">
+                      <Link
+                        href={`/equipments/${favorite.equipmentId}`}
+                        className="inline-flex h-8 items-center justify-center rounded-full border bg-background px-3 text-xs font-medium transition-colors hover:bg-muted"
+                      >
+                        View
+                      </Link>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="icon"
+                        aria-label={`Remove ${favorite.name} from favorites`}
+                        title="Remove favorite"
+                        disabled={deletingId === favorite._id}
+                        onClick={() => void handleDelete(favorite)}
+                      >
+                        <Trash2 className="size-4" aria-hidden="true" />
+                      </Button>
+                    </div>
                   </td>
                 </tr>
               ))}

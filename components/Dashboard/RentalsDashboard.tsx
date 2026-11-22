@@ -236,6 +236,7 @@ export default function RentalsDashboard({ view }: { view: View }) {
                 ) : null}
                 <th className="px-4 py-3 font-medium">Booked</th>
                 <th className="px-4 py-3 font-medium">Total</th>
+                <th className="px-4 py-3 font-medium">Payment status</th>
                 <th className="px-4 py-3 font-medium">
                   {view === "owner" ? "Update status" : "Status"}
                 </th>
@@ -278,6 +279,11 @@ export default function RentalsDashboard({ view }: { view: View }) {
                   </td>
                   <td className="px-4 py-3 font-medium">
                     {formatPrice(rental.totalPrice)}
+                  </td>
+                  <td className="px-4 py-3">
+                    <span className="inline-flex rounded-full bg-muted px-2.5 py-1 text-xs font-medium capitalize">
+                      {rental.paymentStatus || "—"}
+                    </span>
                   </td>
                   <td className="px-4 py-3">
                     {view === "owner" ? (

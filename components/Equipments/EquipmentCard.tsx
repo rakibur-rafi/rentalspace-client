@@ -18,6 +18,7 @@ export type EquipmentCardData = {
   brand?: string
   model?: string
   image?: string
+  status?: string
 }
 
 function formatPrice(value: number) {

@@ -25,6 +25,15 @@ export type AdminAnalytics = {
   monthlyUserGrowth: MonthlyMetric[]
 }
 
+export type CustomerAnalytics = {
+  totalBookings: number
+  totalSpent: number
+  favouriteItems: number
+  onDeliveryRent: number
+  pendingRent: number
+  deliveredRent: number
+}
+
 async function getAnalytics<T>(endpoint: string, token: string): Promise<T> {
   if (!BASE_URL) throw new Error("The backend API URL is not configured.")
 
@@ -45,3 +54,6 @@ export const getOwnerAnalytics = (token: string) =>
 
 export const getAdminAnalytics = (token: string) =>
   getAnalytics<AdminAnalytics>("admin", token)
+
+export const getCustomerAnalytics = (token: string) =>
+  getAnalytics<CustomerAnalytics>("customer", token)

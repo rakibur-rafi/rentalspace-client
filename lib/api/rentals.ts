@@ -12,6 +12,7 @@ export type Rental = {
   rentalType?: string
   checkoutDate?: string
   status?: string
+  paymentStatus?: string
   phone?: string
   address?: string
   equipment?: {

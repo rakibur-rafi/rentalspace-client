@@ -1,11 +1,5 @@
-import React from 'react';
+import CustomerDashboardHome from "@/components/Dashboard/CustomerDashboardHome"
 
-const CustomerPage = () => {
-    return (
-        <div>
-            customer
-        </div>
-    );
-};
-
-export default CustomerPage;
+export default function CustomerPage() {
+  return <CustomerDashboardHome />
+}

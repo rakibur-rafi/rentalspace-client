@@ -2,23 +2,16 @@
 
 import { useEffect, useMemo, useState } from "react"
 import Image from "next/image"
-import { Package, Search } from "lucide-react"
+import { Check, Package, Search, X } from "lucide-react"
 
+import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
 import { toast } from "@/components/ui/toast"
 import { updateEquipmentStatus } from "@/lib/actions/equipments"
 import { getEquipments } from "@/lib/api/equipments"
 import { authClient } from "@/lib/auth-client"
 
-const equipmentStatuses = ["active", "pending", "rejected", "inactive"] as const
-type EquipmentStatus = (typeof equipmentStatuses)[number]
+type EquipmentStatus = "active" | "rejected"
 
 type Equipment = {
   _id: string
@@ -32,8 +25,8 @@ type Equipment = {
   status?: string
   image?: string
   owner?: {
-    email?: string,
-    name?:string,
+    email?: string
+    name?: string
     image?: string
   }
 }
@@ -87,9 +80,14 @@ export default function AdminEquipmentPage() {
     const search = query.trim().toLowerCase()
     if (!search) return equipments
     return equipments.filter((equipment) =>
-      [equipment.name, equipment.brand, equipment.model, equipment.category,
-        equipment.location, equipment.owner?.email]
-        .some((value) => value?.toLowerCase().includes(search))
+      [
+        equipment.name,
+        equipment.brand,
+        equipment.model,
+        equipment.category,
+        equipment.location,
+        equipment.owner?.email,
+      ].some((value) => value?.toLowerCase().includes(search))
     )
   }, [equipments, query])
 
@@ -143,7 +141,7 @@ export default function AdminEquipmentPage() {
         </div>
         <div className="relative w-full sm:max-w-xs">
           <Search
-            className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
+            className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground"
             aria-hidden="true"
           />
           <Input
@@ -172,11 +170,17 @@ export default function AdminEquipmentPage() {
         {loading ? (
           <div className="space-y-3 p-5" aria-label="Loading equipment">
             {[1, 2, 3].map((item) => (
-              <div key={item} className="h-14 animate-pulse rounded-lg bg-muted" />
+              <div
+                key={item}
+                className="h-14 animate-pulse rounded-lg bg-muted"
+              />
             ))}
           </div>
         ) : error ? (
-          <p role="alert" className="px-5 py-14 text-center text-sm text-destructive">
+          <p
+            role="alert"
+            className="px-5 py-14 text-center text-sm text-destructive"
+          >
             {error}
           </p>
         ) : filteredEquipments.length === 0 ? (
@@ -196,6 +200,7 @@ export default function AdminEquipmentPage() {
                   <th className="px-4 py-3 font-medium">Location</th>
                   <th className="px-4 py-3 font-medium">Price</th>
                   <th className="px-4 py-3 font-medium">Status</th>
+                  <th className="px-4 py-3 font-medium">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y">
@@ -240,31 +245,40 @@ export default function AdminEquipmentPage() {
                       </span>
                     </td>
                     <td className="px-4 py-3">
-                      <Select
-                        value={equipment.status || "pending"}
-                        onValueChange={(status) =>
-                          status &&
-                          void handleStatusChange(
-                            equipment,
-                            status as EquipmentStatus
-                          )
-                        }
-                        disabled={updatingId === equipment._id}
-                      >
-                        <SelectTrigger
-                          aria-label={`Status for ${equipment.name || "equipment"}`}
-                          className="w-36"
+                      <span className="inline-flex rounded-full bg-muted px-2.5 py-1 text-xs font-medium">
+                        {capitalize(equipment.status || "pending")}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3">
+                      <div className="flex items-center gap-2">
+                        <Button
+                          type="button"
+                          size="sm"
+                          onClick={() =>
+                            void handleStatusChange(equipment, "active")
+                          }
+                          disabled={
+                            updatingId === equipment._id ||
+                            (equipment.status || "pending") !== "pending"
+                          }
                         >
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                        {equipmentStatuses.map((status) => (
-                          <SelectItem key={status} value={status}>
-                            {capitalize(status)}
-                          </SelectItem>
-                        ))}
-                        </SelectContent>
-                      </Select>
+                          <Check aria-hidden="true" /> Accept
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="destructive"
+                          size="sm"
+                          onClick={() =>
+                            void handleStatusChange(equipment, "rejected")
+                          }
+                          disabled={
+                            updatingId === equipment._id ||
+                            (equipment.status || "pending") !== "pending"
+                          }
+                        >
+                          <X aria-hidden="true" /> Reject
+                        </Button>
+                      </div>
                     </td>
                   </tr>
                 ))}

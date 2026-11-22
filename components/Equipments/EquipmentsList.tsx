@@ -178,10 +178,15 @@ export function EquipmentsList() {
           maxPrice: maxPrice || undefined,
           availability: availability || undefined,
           sort: sort || undefined,
+          status: "active",
         })
 
         if (active) {
-          setEquipments(Array.isArray(result) ? result : [])
+          setEquipments(
+            Array.isArray(result)
+              ? result.filter((equipment) => equipment.status === "active")
+              : []
+          )
         }
       } catch {
         if (active) {

@@ -12,6 +12,7 @@ type EquipmentFilters = {
   maxPrice?: string
   availability?: string
   sort?: string
+  status?: string
 }
 
 export const getEquipments = async (filters: EquipmentFilters = {}) => {
