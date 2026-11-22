@@ -166,12 +166,14 @@ export function Sidebar({ role }: { role?: string | null }) {
 
   return (
     <>
-      <div className="flex h-16 items-center justify-between border-b bg-card px-4 md:hidden">
-        {brand}
+      <div className="flex h-12 items-center justify-between border-b bg-card px-4 md:hidden">
+        <span className="text-sm font-medium text-muted-foreground">
+          Dashboard navigation
+        </span>
         <button
           type="button"
           onClick={() => setOpen(true)}
-          aria-label="Open menu"
+          aria-label="Open dashboard navigation"
           className="flex size-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
         >
           <Menu className="size-5" aria-hidden="true" />
@@ -189,7 +191,7 @@ export function Sidebar({ role }: { role?: string | null }) {
 
       <aside
         className={cn(
-          "fixed inset-y-0 left-0 z-50 flex w-64 -translate-x-full flex-col border-r bg-card transition-transform duration-200 md:sticky md:top-0 md:h-svh md:translate-x-0",
+          "fixed inset-y-0 left-0 z-50 flex w-64 -translate-x-full flex-col border-r bg-card transition-transform duration-200 md:sticky md:top-16 md:h-[calc(100svh-4rem)] md:translate-x-0",
           open && "translate-x-0"
         )}
       >
