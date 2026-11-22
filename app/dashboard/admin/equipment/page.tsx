@@ -2,12 +2,15 @@
 
 import { useEffect, useMemo, useState } from "react"
 import Image from "next/image"
-import { Check, Package, Search, X } from "lucide-react"
+import { Check, Package, Search, Trash2, X } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { toast } from "@/components/ui/toast"
-import { updateEquipmentStatus } from "@/lib/actions/equipments"
+import {
+  deleteAdminEquipment,
+  updateEquipmentStatus,
+} from "@/lib/actions/equipments"
 import { getEquipments } from "@/lib/api/equipments"
 import { authClient } from "@/lib/auth-client"
 
@@ -62,6 +65,7 @@ export default function AdminEquipmentPage() {
   const [error, setError] = useState("")
   const [query, setQuery] = useState("")
   const [updatingId, setUpdatingId] = useState<string | null>(null)
+  const [deletingId, setDeletingId] = useState<string | null>(null)
 
   useEffect(() => {
     let active = true
@@ -137,6 +141,37 @@ export default function AdminEquipmentPage() {
       })
     } finally {
       setUpdatingId(null)
+    }
+  }
+
+  async function handleDelete(equipment: Equipment) {
+    setDeletingId(equipment._id)
+    try {
+      const { data } = await authClient.token()
+      if (!data?.token) {
+        throw new Error("Your session expired. Please sign in again.")
+      }
+
+      await deleteAdminEquipment(equipment._id, data.token)
+      setEquipments((current) =>
+        current.filter((item) => item._id !== equipment._id)
+      )
+      toast.add({
+        title: "Equipment deleted",
+        description: `${equipment.name || "Equipment"} was removed from RentalSpace.`,
+        type: "success",
+      })
+    } catch (deleteError) {
+      toast.add({
+        title: "Could not delete equipment",
+        description:
+          deleteError instanceof Error
+            ? deleteError.message
+            : "Please try again.",
+        type: "error",
+      })
+    } finally {
+      setDeletingId(null)
     }
   }
 
@@ -274,6 +309,7 @@ export default function AdminEquipmentPage() {
                           }
                           disabled={
                             updatingId === equipment._id ||
+                            deletingId === equipment._id ||
                             (equipment.status || "pending") !== "pending"
                           }
                         >
@@ -288,10 +324,25 @@ export default function AdminEquipmentPage() {
                           }
                           disabled={
                             updatingId === equipment._id ||
+                            deletingId === equipment._id ||
                             (equipment.status || "pending") !== "pending"
                           }
                         >
                           <X aria-hidden="true" /> Reject
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="destructive"
+                          size="icon-sm"
+                          aria-label={`Delete ${equipment.name || "equipment"}`}
+                          title="Delete equipment"
+                          disabled={
+                            updatingId === equipment._id ||
+                            deletingId === equipment._id
+                          }
+                          onClick={() => void handleDelete(equipment)}
+                        >
+                          <Trash2 aria-hidden="true" />
                         </Button>
                       </div>
                     </td>

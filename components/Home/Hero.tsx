@@ -1,6 +1,6 @@
 import Image from "next/image"
 import Link from "next/link"
-import { ArrowRight, ArrowUpRight, BadgeCheck, Star } from "lucide-react"
+import { ArrowUpRight, BadgeCheck, Star } from "lucide-react"
 
 import { buttonVariants } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
@@ -10,23 +10,6 @@ const avatars = [
   { src: "/avatars/avatar-2.jpg", alt: "RentalSpace customer" },
   { src: "/avatars/avatar-3.jpg", alt: "RentalSpace customer" },
   { src: "/avatars/avatar-4.jpg", alt: "RentalSpace customer" },
-]
-
-const categories = [
-  {
-    title: "Power tools",
-    meta: "120+ listings",
-    href: "/equipments?category=Power%20Tools",
-    image: "/images/category-power-tools.jpg",
-    alt: "Cordless drill resting on a workbench",
-  },
-  {
-    title: "Heavy equipment",
-    meta: "80+ listings",
-    href: "/equipments?category=Heavy%20Equipment",
-    image: "/images/category-heavy-equipment.jpg",
-    alt: "Mini excavator on a construction site",
-  },
 ]
 
 export function Hero() {
@@ -127,51 +110,6 @@ export function Hero() {
               />
               Verified local vendors
             </div>
-          </div>
-        </div>
-
-        <div className="mt-4 grid gap-4 sm:grid-cols-2 md:grid-cols-3">
-          {categories.map((category) => (
-            <Link
-              key={category.title}
-              href={category.href}
-              className="group relative h-56 overflow-hidden rounded-[1.75rem] border bg-muted"
-            >
-              <Image
-                src={category.image}
-                alt={category.alt}
-                fill
-                sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
-                className="object-cover transition-transform duration-500 group-hover:scale-105"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/10 to-transparent" />
-              <div className="absolute inset-x-0 bottom-0 p-5 text-white">
-                <p className="text-lg font-medium tracking-tight">
-                  {category.title}
-                </p>
-                <p className="mt-0.5 text-xs text-white/75">{category.meta}</p>
-              </div>
-            </Link>
-          ))}
-
-          <div className="flex h-56 flex-col items-center justify-center rounded-[1.75rem] border bg-card p-6 text-center sm:col-span-2 md:col-span-1">
-            <p className="max-w-[14ch] text-2xl leading-tight font-semibold tracking-tight text-balance">
-              Gear for every job
-            </p>
-            <p className="mt-2 max-w-xs text-sm leading-5 text-muted-foreground">
-              Browse tools, machinery, and event equipment from vendors near
-              you.
-            </p>
-            <Link
-              href="/equipments"
-              className={cn(
-                buttonVariants({ size: "sm" }),
-                "mt-5 rounded-full px-4"
-              )}
-            >
-              Explore more
-              <ArrowRight className="size-3.5" aria-hidden="true" />
-            </Link>
           </div>
         </div>
       </div>

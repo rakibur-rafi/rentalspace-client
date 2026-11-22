@@ -1,3 +1,5 @@
+import type { EquipmentCardData } from "@/components/Equipments/EquipmentCard"
+
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_API_URL
 
 type EquipmentFilters = {
@@ -31,6 +33,22 @@ export const getEquipments = async (filters: EquipmentFilters = {}) => {
 
   if (!res.ok) {
     throw new Error("Failed to fetch equipments")
+  }
+
+  return res.json()
+}
+
+export const getFeaturedEquipments = async (): Promise<EquipmentCardData[]> => {
+  if (!BASE_URL) {
+    throw new Error("The backend API URL is not configured.")
+  }
+
+  const res = await fetch(`${BASE_URL}/equipments/featured`, {
+    cache: "no-store",
+  })
+
+  if (!res.ok) {
+    throw new Error("Failed to fetch featured equipment.")
   }
 
   return res.json()

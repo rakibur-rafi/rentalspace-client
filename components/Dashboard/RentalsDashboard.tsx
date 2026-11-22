@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react"
 import Image from "next/image"
 import Link from "next/link"
-import { CalendarDays, Eye, Package, RotateCw } from "lucide-react"
+import { CalendarDays, Eye, Package, RotateCw, Trash2 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -16,6 +16,7 @@ import {
 import {
   getAllRentals,
   getCustomerRentals,
+  deleteAdminRental,
   getOwnerRentals,
   type Rental,
 } from "@/lib/api/rentals"
@@ -91,6 +92,7 @@ export default function RentalsDashboard({ view }: { view: View }) {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
   const [updatingRentalId, setUpdatingRentalId] = useState<string | null>(null)
+  const [deletingRentalId, setDeletingRentalId] = useState<string | null>(null)
 
   const loadRentals = useCallback(async () => {
     if (!session) return
@@ -182,6 +184,35 @@ export default function RentalsDashboard({ view }: { view: View }) {
     }
   }
 
+  async function handleDeleteRental(rental: RentalRow) {
+    setDeletingRentalId(rental._id)
+    try {
+      const { data } = await authClient.token()
+      if (!data?.token) {
+        throw new Error("Your session expired. Please sign in again.")
+      }
+
+      await deleteAdminRental(rental._id, data.token)
+      setRentals((current) => current.filter((item) => item._id !== rental._id))
+      toast.add({
+        title: "Rental removed",
+        description: `${rental.equipmentName} was deleted from all rentals.`,
+        type: "success",
+      })
+    } catch (deleteError) {
+      toast.add({
+        title: "Could not remove rental",
+        description:
+          deleteError instanceof Error
+            ? deleteError.message
+            : "Please try again.",
+        type: "error",
+      })
+    } finally {
+      setDeletingRentalId(null)
+    }
+  }
+
   useEffect(() => {
     const timer = window.setTimeout(() => void loadRentals(), 0)
     return () => window.clearTimeout(timer)
@@ -269,7 +300,9 @@ export default function RentalsDashboard({ view }: { view: View }) {
                 <th className="px-4 py-3 font-medium">
                   {view === "owner" ? "Update status" : "Status"}
                 </th>
-                <th className="px-4 py-3 text-right font-medium">View</th>
+                <th className="px-4 py-3 text-right font-medium">
+                  {view === "admin" ? "Actions" : "View"}
+                </th>
               </tr>
             </thead>
             <tbody className="divide-y">
@@ -355,19 +388,32 @@ export default function RentalsDashboard({ view }: { view: View }) {
                       </span>
                     )}
                   </td>
-                  <td className="px-4 py-3 text-right">
-                    {rental.equipmentLinkId ? (
-                      <Link
-                        href={`/equipments/${rental.equipmentLinkId}`}
-                        aria-label={`View ${rental.equipmentName}`}
-                        title="View equipment"
-                        className="inline-flex size-9 items-center justify-center rounded-full border transition-colors hover:bg-muted"
-                      >
-                        <Eye className="size-4" aria-hidden="true" />
-                      </Link>
-                    ) : (
-                      <span className="text-muted-foreground">—</span>
-                    )}
+                  <td className="px-4 py-3">
+                    <div className="flex justify-end gap-2">
+                      {rental.equipmentLinkId ? (
+                        <Link
+                          href={`/equipments/${rental.equipmentLinkId}`}
+                          aria-label={`View ${rental.equipmentName}`}
+                          title="View equipment"
+                          className="inline-flex size-9 items-center justify-center rounded-full border transition-colors hover:border-primary/30 hover:bg-primary/5 hover:text-primary"
+                        >
+                          <Eye className="size-4" aria-hidden="true" />
+                        </Link>
+                      ) : null}
+                      {view === "admin" ? (
+                        <Button
+                          type="button"
+                          variant="destructive"
+                          size="icon"
+                          aria-label={`Delete rental for ${rental.equipmentName}`}
+                          title="Delete rental"
+                          disabled={deletingRentalId === rental._id}
+                          onClick={() => void handleDeleteRental(rental)}
+                        >
+                          <Trash2 className="size-4" aria-hidden="true" />
+                        </Button>
+                      ) : null}
+                    </div>
                   </td>
                 </tr>
               ))}

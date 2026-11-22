@@ -72,3 +72,21 @@ export const getAllRentals = async (token: string): Promise<Rental[]> => {
   if (!res.ok) throw new Error("Failed to fetch all rentals.")
   return res.json()
 }
+
+export const deleteAdminRental = async (id: string, token: string) => {
+  if (!BASE_URL) {
+    throw new Error("The backend API URL is not configured.")
+  }
+
+  const res = await fetch(`${BASE_URL}/rentals/all-rentals/${id}`, {
+    method: "DELETE",
+    headers: { Authorization: `Bearer ${token}` },
+  })
+
+  if (!res.ok) {
+    const result = await res.json().catch(() => null)
+    throw new Error(result?.message ?? "Failed to remove rental.")
+  }
+
+  return res.json()
+}

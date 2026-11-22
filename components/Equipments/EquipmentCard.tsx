@@ -31,9 +31,11 @@ function formatPrice(value: number) {
 export default function EquipmentCard({
   equipment,
   initiallySaved = false,
+  detailsHref,
 }: {
   equipment: EquipmentCardData
   initiallySaved?: boolean
+  detailsHref?: string
 }) {
   const available = equipment.availableQuantity > 0
 
@@ -63,7 +65,7 @@ export default function EquipmentCard({
             <Package className="size-8" aria-hidden="true" />
           </span>
         )}
-        <span className="absolute top-3 left-3 rounded-full bg-sky-500/10 px-2.5 py-1 text-xs font-semibold text-sky-800 backdrop-blur dark:text-sky-200">
+        <span className="absolute top-3 left-3 rounded-full bg-white/80 border px-2.5 py-1 text-xs font-semibold text-black backdrop-blur dark:text-sky-200">
           {equipment.category}
         </span>
         <span
@@ -94,7 +96,7 @@ export default function EquipmentCard({
         </p>
         {available ? (
           <Link
-            href={`/equipments/${equipment._id}`}
+            href={detailsHref ?? `/equipments/${equipment._id}`}
             className={buttonVariants({
               size: "sm",
               className: "mt-4 w-full",

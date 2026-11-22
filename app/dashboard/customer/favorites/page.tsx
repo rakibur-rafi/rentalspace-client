@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react"
 import Image from "next/image"
 import Link from "next/link"
-import { Heart, Package, RotateCw, Trash2 } from "lucide-react"
+import { Eye, Heart, Package, RotateCw, Trash2 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { getFavourites, type Favourite } from "@/lib/api/favourites"
@@ -166,14 +166,16 @@ export default function CustomerFavoritesPage() {
                     <div className="flex justify-end gap-2">
                       <Link
                         href={`/equipments/${favorite.equipmentId}`}
-                        className="inline-flex h-8 items-center justify-center rounded-full border bg-background px-3 text-xs font-medium transition-colors hover:bg-muted"
+                        aria-label={`View ${favorite.name}`}
+                        title="View equipment"
+                        className="inline-flex size-8 items-center justify-center rounded-full border bg-background transition-colors hover:border-primary/30 hover:bg-primary/5 hover:text-primary"
                       >
-                        View
+                        <Eye className="size-4" aria-hidden="true" />
                       </Link>
                       <Button
                         type="button"
                         variant="outline"
-                        size="icon"
+                        size="icon-sm"
                         aria-label={`Remove ${favorite.name} from favorites`}
                         title="Remove favorite"
                         disabled={deletingId === favorite._id}

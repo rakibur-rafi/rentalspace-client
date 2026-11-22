@@ -5,7 +5,6 @@ import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { useTheme } from "next-themes"
 import {
-  LayoutGrid,
   LogIn,
   LogOut,
   Menu,
@@ -13,7 +12,6 @@ import {
   Sun,
   UserPlus,
   Store,
-  WrenchIcon,
   X,
 } from "lucide-react"
 
@@ -21,7 +19,7 @@ import { Button, buttonVariants } from "@/components/ui/button"
 import { authClient } from "@/lib/auth-client"
 import { cn } from "@/lib/utils"
 import Image from "next/image"
-import { toast } from "../ui/toast"
+import { toast } from "@/components/ui/toast"
 
 function getInitials(name?: string | null) {
   if (!name) {
@@ -49,18 +47,18 @@ export function Navbar() {
   const image = user?.image
   const role = user?.role
 
-  const navLinks = [
-    { href: "/equipments", label: "All Equipment", icon: Store },
-  ]
+  const navLinks = [{ href: "/equipments", label: "All Equipment" }]
 
   const userNavLinks = [
-    { href: "/equipments", label: "All Equipment", icon: Store },
-    {
-      href: `/dashboard/${role}`,
-      label: "Dashboard",
-      icon: LayoutGrid,
-    },
+    { href: "/equipments", label: "All Equipment" },
+    { href: `/dashboard/${role}`, label: "Dashboard" },
   ]
+
+  const primaryNavLinks = user ? userNavLinks : navLinks
+
+  function isActive(href: string) {
+    return pathname === href || pathname.startsWith(`${href}/`)
+  }
 
   function toggleTheme() {
     setTheme(resolvedTheme === "dark" ? "light" : "dark")
@@ -114,21 +112,19 @@ export function Navbar() {
           className="hidden items-center md:flex"
           aria-label="Main navigation"
         >
-          {(user ? userNavLinks : navLinks).map(
-            ({ href, label, icon: Icon }) => (
-              <Link
-                key={href}
-                href={href}
-                className={cn(
-                  buttonVariants({ variant: "ghost", size: "sm" }),
-                  "gap-2"
-                )}
-              >
-                <Icon className="size-4" aria-hidden="true" />
-                {label}
-              </Link>
-            )
-          )}
+          {primaryNavLinks.map(({ href, label }) => (
+            <Link
+              key={href}
+              href={href}
+              aria-current={isActive(href) ? "page" : undefined}
+              className={cn(
+                buttonVariants({ variant: "ghost", size: "sm" }),
+                isActive(href) && "bg-primary/10 text-primary"
+              )}
+            >
+              {label}
+            </Link>
+          ))}
         </nav>
 
         <div className="flex items-center gap-1.5">
@@ -234,17 +230,18 @@ export function Navbar() {
           className="border-t border-border/70 bg-background px-4 py-4 md:hidden"
         >
           <nav className="flex flex-col gap-1.5" aria-label="Mobile navigation">
-            {navLinks.map(({ href, label, icon: Icon }) => (
+            {primaryNavLinks.map(({ href, label }) => (
               <Link
                 key={href}
                 href={href}
                 onClick={closeMenu}
+                aria-current={isActive(href) ? "page" : undefined}
                 className={cn(
                   buttonVariants({ variant: "ghost", size: "lg" }),
-                  "w-full justify-start gap-2"
+                  "w-full justify-start",
+                  isActive(href) && "bg-primary/10 text-primary"
                 )}
               >
-                <Icon className="size-4" aria-hidden="true" />
                 {label}
               </Link>
             ))}
@@ -264,9 +261,19 @@ export function Navbar() {
                   )}
                   title={user.name ?? undefined}
                 >
-                  <span className="flex size-6 items-center justify-center rounded-full bg-muted text-[10px] font-semibold">
-                    {initials}
-                  </span>
+                  {image ? (
+                    <Image
+                      src={image}
+                      alt=""
+                      width={24}
+                      height={24}
+                      className="size-6 rounded-full object-cover"
+                    />
+                  ) : (
+                    <span className="flex size-6 items-center justify-center rounded-full bg-primary/10 text-[10px] font-semibold text-primary">
+                      {initials}
+                    </span>
+                  )}
                   Profile
                 </Link>
                 <Button

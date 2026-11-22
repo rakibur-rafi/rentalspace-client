@@ -72,3 +72,23 @@ export const deleteEquipments = async (id: string, token: string) => {
 
   return res.json()
 }
+
+export const deleteAdminEquipment = async (id: string, token: string) => {
+  if (!BASE_URL) {
+    throw new Error("The backend API URL is not configured.")
+  }
+
+  const res = await fetch(`${BASE_URL}/equipments/${id}`, {
+    method: "DELETE",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  })
+
+  if (!res.ok) {
+    const result = await res.json().catch(() => null)
+    throw new Error(result?.message ?? "Failed to remove equipment.")
+  }
+
+  return res.json()
+}
