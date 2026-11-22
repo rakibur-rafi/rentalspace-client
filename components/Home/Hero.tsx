@@ -95,7 +95,7 @@ export function Hero() {
 
           <div className="relative min-h-[480px] overflow-hidden rounded-[2rem] bg-gradient-to-b from-zinc-200 via-zinc-100 to-sky-200 lg:min-h-[650px]">
             <Image
-              src="/images/rentalspace-hero.jpg"
+              src="/images/category-heavy-equipment.jpg"
               alt="Construction professional wearing safety gear"
               fill
               priority

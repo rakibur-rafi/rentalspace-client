@@ -189,7 +189,7 @@ export function Sidebar({ role }: { role?: string | null }) {
 
       <aside
         className={cn(
-          "fixed inset-y-0 left-0 z-50 flex w-64 -translate-x-full flex-col border-r border-border/70 bg-background/90 backdrop-blur-xl transition-transform duration-200 md:sticky md:top-16 md:h-[calc(100svh-4rem)] md:translate-x-0",
+          "fixed inset-y-0 left-0 z-50 md:z-40 flex w-64 -translate-x-full flex-col border-r border-border/70 bg-background/90 backdrop-blur-xl transition-transform duration-200 md:sticky md:top-16 md:h-[calc(100svh-4rem)] md:translate-x-0",
           open && "translate-x-0"
         )}
       >

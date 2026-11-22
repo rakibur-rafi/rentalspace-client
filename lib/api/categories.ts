@@ -3,14 +3,21 @@ const BASE_URL = process.env.NEXT_PUBLIC_BASE_API_URL
 type CategoryRecord =
   | string
   | {
+      _id?: string
       name?: string
       category?: string
       title?: string
       label?: string
       value?: string
+      image?: string | null
     }
 
-export const getCategories = async (): Promise<string[]> => {
+export type Category = {
+  name: string
+  image?: string | null
+}
+
+export const getCategoryRecords = async (): Promise<Category[]> => {
   if (!BASE_URL) {
     throw new Error("The backend API URL is not configured.")
   }
@@ -27,12 +34,18 @@ export const getCategories = async (): Promise<string[]> => {
     return []
   }
 
-  return result
-    .map((item) => {
-      if (typeof item === "string") return item
-      return (
-        item.name ?? item.category ?? item.title ?? item.label ?? item.value
-      )
-    })
-    .filter((category): category is string => Boolean(category?.trim()))
+  return result.flatMap((item) => {
+    if (typeof item === "string") {
+      return item.trim() ? [{ name: item.trim() }] : []
+    }
+
+    const name =
+      item.name ?? item.category ?? item.title ?? item.label ?? item.value
+    return name?.trim() ? [{ name: name.trim(), image: item.image }] : []
+  })
+}
+
+export const getCategories = async (): Promise<string[]> => {
+  const categories = await getCategoryRecords()
+  return categories.map((category) => category.name)
 }

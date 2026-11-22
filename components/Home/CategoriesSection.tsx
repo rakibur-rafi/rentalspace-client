@@ -6,7 +6,7 @@ import Link from "next/link"
 import { ArrowRight, Layers3, RotateCw } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
-import { getCategories } from "@/lib/api/categories"
+import { getCategoryRecords, type Category } from "@/lib/api/categories"
 
 const categoryTones = [
   "bg-sky-500/10 text-sky-700 dark:text-sky-300",
@@ -17,8 +17,10 @@ const categoryTones = [
   "bg-cyan-500/10 text-cyan-700 dark:text-cyan-300",
 ]
 
-function getCategoryImage(category: string) {
-  const value = category.toLowerCase()
+function getCategoryImage(category: Category) {
+  if (category.image) return category.image
+
+  const value = category.name.toLowerCase()
   if (value.includes("heavy") || value.includes("machine")) {
     return "/images/category-heavy-equipment.jpg"
   }
@@ -29,7 +31,7 @@ function getCategoryImage(category: string) {
 }
 
 export default function CategoriesSection() {
-  const [categories, setCategories] = useState<string[]>([])
+  const [categories, setCategories] = useState<Category[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
   const [retryKey, setRetryKey] = useState(0)
@@ -41,7 +43,7 @@ export default function CategoriesSection() {
       setLoading(true)
       setError("")
       try {
-        const result = await getCategories()
+        const result = await getCategoryRecords()
         if (active) setCategories(result)
       } catch (loadError) {
         if (active) {
@@ -122,8 +124,8 @@ export default function CategoriesSection() {
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {categories.map((category, index) => (
               <Link
-                key={category}
-                href={`/equipments?category=${encodeURIComponent(category)}`}
+                key={category.name}
+                href={`/equipments?category=${encodeURIComponent(category.name)}`}
                 className="group overflow-hidden rounded-2xl border bg-card shadow-sm shadow-primary/5 transition-colors hover:border-primary/30"
               >
                 <div className="relative aspect-[16/9] overflow-hidden bg-muted">
@@ -142,7 +144,9 @@ export default function CategoriesSection() {
                 </div>
                 <div className="flex items-center justify-between gap-4 p-5">
                   <div>
-                    <h3 className="font-semibold tracking-tight">{category}</h3>
+                    <h3 className="font-semibold tracking-tight">
+                      {category.name}
+                    </h3>
                     <p className="mt-1 text-sm text-muted-foreground">
                       Explore available listings
                     </p>
