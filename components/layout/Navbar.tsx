@@ -4,13 +4,14 @@ import { useState } from "react"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { useTheme } from "next-themes"
-import { LogIn, LogOut, Menu, Moon, Sun, UserPlus, X } from "lucide-react"
+import { LogIn, LogOut, Menu, Moon, RouteArrowRight, Sun, UserPlus, X } from "lucide-react"
 
 import { Button, buttonVariants } from "@/components/ui/button"
 import { authClient } from "@/lib/auth-client"
 import { cn } from "@/lib/utils"
 import Image from "next/image"
 import { toast } from "@/components/ui/toast"
+import { DashboardNavbar } from "@/components/layout/DashboardNavbar"
 
 function getInitials(name?: string | null) {
   if (!name) {
@@ -27,6 +28,16 @@ function getInitials(name?: string | null) {
 }
 
 export function Navbar() {
+  const pathname = usePathname()
+
+  if (pathname.startsWith("/dashboard")) {
+    return <DashboardNavbar />
+  }
+
+  return <PublicNavbar />
+}
+
+function PublicNavbar() {
   const router = useRouter()
   const pathname = usePathname()
   const [menuOpen, setMenuOpen] = useState(false)
@@ -38,9 +49,14 @@ export function Navbar() {
   const image = user?.image
   const role = user?.role
 
-  const navLinks = [{ href: "/equipments", label: "All Equipment" }]
+  const navLinks = [
+    { href: "/", label: "Home" },
+    { href: "/equipments", label: "All Equipment" },
+
+  ]
 
   const userNavLinks = [
+    { href: "/", label: "Home" },
     { href: "/equipments", label: "All Equipment" },
     { href: `/dashboard/${role}`, label: "Dashboard" },
   ]
@@ -84,9 +100,10 @@ export function Navbar() {
       <div className="mx-auto flex h-16 w-full max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
         <Link
           href="/"
-          className="flex items-center gap-2.5"
+          className="flex items-center"
           onClick={closeMenu}
         >
+        <RouteArrowRight className="size-5" aria-hidden="true" />
           <span className="text-lg font-semibold tracking-tighter">
             RentalSpace
           </span>

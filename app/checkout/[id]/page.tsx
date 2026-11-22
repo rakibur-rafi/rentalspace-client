@@ -136,7 +136,7 @@ export default async function CheckoutPage({
               {equipment.location && (
                 <div className="rounded-xl bg-muted/50 p-3">
                   <p className="text-xs text-muted-foreground">
-                    Pickup location
+                    Owner location
                   </p>
                   <p className="mt-1 flex items-center gap-1.5 font-medium">
                     <MapPin

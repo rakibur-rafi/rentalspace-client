@@ -13,10 +13,10 @@ import {
   Menu,
   Package,
   PlusCircle,
+  RouteArrowRight,
   User,
   Users,
   Store,
-  Wrench,
   X,
   type LucideIcon,
   ChartNoAxesColumn,
@@ -154,18 +154,16 @@ export function Sidebar({ role }: { role?: string | null }) {
   const brand = (
     <Link
       href="/"
-      className="flex items-center gap-2.5"
+      className="flex items-center px-2"
       onClick={() => setOpen(false)}
     >
-      <span className="flex size-9 items-center justify-center rounded-xl bg-primary text-primary-foreground">
-        <Wrench className="size-5" aria-hidden="true" />
-      </span>
+      <RouteArrowRight className="size-5" aria-hidden="true" />
       <span className="text-lg font-semibold tracking-tight">RentalSpace</span>
     </Link>
   )
 
   return (
-    <>
+    <div className="">
       <div className="flex h-12 items-center justify-between border-b bg-card px-4 md:hidden">
         <span className="text-sm font-medium text-muted-foreground">
           Dashboard navigation
@@ -191,7 +189,7 @@ export function Sidebar({ role }: { role?: string | null }) {
 
       <aside
         className={cn(
-          "fixed inset-y-0 left-0 z-50 flex w-64 -translate-x-full flex-col border-r bg-card transition-transform duration-200 md:sticky md:top-16 md:h-[calc(100svh-4rem)] md:translate-x-0",
+          "fixed inset-y-0 left-0 z-50 flex w-64 -translate-x-full flex-col border-r border-border/70 bg-background/90 backdrop-blur-xl transition-transform duration-200 md:sticky md:top-16 md:h-[calc(100svh-4rem)] md:translate-x-0",
           open && "translate-x-0"
         )}
       >
@@ -287,6 +285,6 @@ export function Sidebar({ role }: { role?: string | null }) {
           ) : null}
         </div>
       </aside>
-    </>
+    </div>
   )
 }
