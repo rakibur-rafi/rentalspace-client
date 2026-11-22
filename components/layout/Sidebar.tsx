@@ -19,6 +19,7 @@ import {
   Wrench,
   X,
   type LucideIcon,
+  ChartNoAxesColumn,
 } from "lucide-react"
 
 import { toast } from "@/components/ui/toast"
@@ -45,6 +46,7 @@ const navItems: Record<
       label: "Favorites",
       icon: Heart,
     },
+    
     { href: "/dashboard/profile", label: "My Profile", icon: User },
   ],
   owner: [
@@ -63,6 +65,11 @@ const navItems: Record<
       label: "My Equipment Rental",
       icon: ClipboardList,
     },
+    {
+      href: "/dashboard/owner/analytics",
+      label: "Analytics",
+      icon: ChartNoAxesColumn,
+    },
     { href: "/dashboard/profile", label: "My Profile", icon: User },
   ],
   admin: [
@@ -76,6 +83,11 @@ const navItems: Record<
       href: "/dashboard/admin/rentals",
       label: "All Rentals",
       icon: ClipboardList,
+    },
+    {
+      href: "/dashboard/admin/analytics",
+      label: "Analytics",
+      icon: ChartNoAxesColumn,
     },
     { href: "/dashboard/profile", label: "My Profile", icon: User },
   ],

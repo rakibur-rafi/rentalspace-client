@@ -5,7 +5,20 @@ import Image from "next/image"
 import { Package, Search } from "lucide-react"
 
 import { Input } from "@/components/ui/input"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import { toast } from "@/components/ui/toast"
+import { updateEquipmentStatus } from "@/lib/actions/equipments"
 import { getEquipments } from "@/lib/api/equipments"
+import { authClient } from "@/lib/auth-client"
+
+const equipmentStatuses = ["active", "pending", "rejected", "inactive"] as const
+type EquipmentStatus = (typeof equipmentStatuses)[number]
 
 type Equipment = {
   _id: string
@@ -33,19 +46,12 @@ function capitalize(value?: string) {
   return value.charAt(0).toUpperCase() + value.slice(1)
 }
 
-function statusClasses(status?: string) {
-  if (status === "approved") {
-    return "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
-  }
-  if (status === "rejected") return "bg-destructive/10 text-destructive"
-  return "bg-amber-500/10 text-amber-600 dark:text-amber-400"
-}
-
 export default function AdminEquipmentPage() {
   const [equipments, setEquipments] = useState<Equipment[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
   const [query, setQuery] = useState("")
+  const [updatingId, setUpdatingId] = useState<string | null>(null)
 
   useEffect(() => {
     let active = true
@@ -82,6 +88,42 @@ export default function AdminEquipmentPage() {
         .some((value) => value?.toLowerCase().includes(search))
     )
   }, [equipments, query])
+
+  async function handleStatusChange(
+    equipment: Equipment,
+    status: EquipmentStatus
+  ) {
+    if (equipment.status === status) return
+    setUpdatingId(equipment._id)
+    try {
+      const { data } = await authClient.token()
+      if (!data?.token) {
+        throw new Error("Your session expired. Please sign in again.")
+      }
+      await updateEquipmentStatus(equipment._id, status, data.token)
+      setEquipments((current) =>
+        current.map((item) =>
+          item._id === equipment._id ? { ...item, status } : item
+        )
+      )
+      toast.add({
+        title: "Equipment status updated",
+        description: `${equipment.name || "Equipment"} is now ${status}.`,
+        type: "success",
+      })
+    } catch (updateError) {
+      toast.add({
+        title: "Could not update equipment status",
+        description:
+          updateError instanceof Error
+            ? updateError.message
+            : "Please try again.",
+        type: "error",
+      })
+    } finally {
+      setUpdatingId(null)
+    }
+  }
 
   return (
     <section className="mx-auto w-full max-w-6xl space-y-6">
@@ -194,11 +236,31 @@ export default function AdminEquipmentPage() {
                       </span>
                     </td>
                     <td className="px-4 py-3">
-                      <span
-                        className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium ${statusClasses(equipment.status)}`}
+                      <Select
+                        value={equipment.status || "pending"}
+                        onValueChange={(status) =>
+                          status &&
+                          void handleStatusChange(
+                            equipment,
+                            status as EquipmentStatus
+                          )
+                        }
+                        disabled={updatingId === equipment._id}
                       >
-                        {capitalize(equipment.status || "pending")}
-                      </span>
+                        <SelectTrigger
+                          aria-label={`Status for ${equipment.name || "equipment"}`}
+                          className="w-36"
+                        >
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                        {equipmentStatuses.map((status) => (
+                          <SelectItem key={status} value={status}>
+                            {capitalize(status)}
+                          </SelectItem>
+                        ))}
+                        </SelectContent>
+                      </Select>
                     </td>
                   </tr>
                 ))}

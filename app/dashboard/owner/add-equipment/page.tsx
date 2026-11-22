@@ -7,6 +7,13 @@ import { Camera, User } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import { toast } from "@/components/ui/toast"
 import { uploadImage } from "@/lib/actions/image"
 import { authClient } from "@/lib/auth-client"
@@ -30,9 +37,6 @@ const rentalTypes = [
   { value: "weekly", label: "Weekly" },
   { value: "monthly", label: "Monthly" },
 ]
-
-const selectClassName =
-  "h-9 w-full rounded-md border border-input bg-transparent px-2.5 py-1 text-sm shadow-xs outline-none transition-[color,box-shadow] focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-input/30"
 
 const textareaClassName =
   "min-h-28 w-full rounded-md border border-input bg-transparent px-2.5 py-2 text-sm shadow-xs outline-none transition-[color,box-shadow] focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-input/30"
@@ -231,22 +235,23 @@ export default function AddEquipmentPage() {
             <Label htmlFor="category">
               Category <span className="text-destructive">*</span>
             </Label>
-            <select
+            <Select
               id="category"
               name="category"
-              className={selectClassName}
               defaultValue=""
               required
             >
-              <option value="" disabled>
-                Select a category
-              </option>
+              <SelectTrigger id="category">
+                <SelectValue placeholder="Select a category" />
+              </SelectTrigger>
+              <SelectContent>
               {categories.map((category) => (
-                <option key={category} value={category}>
+                <SelectItem key={category} value={category}>
                   {category}
-                </option>
+                </SelectItem>
               ))}
-            </select>
+              </SelectContent>
+            </Select>
           </div>
 
           <div className="space-y-2 sm:col-span-2">
@@ -293,19 +298,23 @@ export default function AddEquipmentPage() {
             <Label htmlFor="rentalType">
               Rental type <span className="text-destructive">*</span>
             </Label>
-            <select
+            <Select
               id="rentalType"
               name="rentalType"
-              className={selectClassName}
               defaultValue="daily"
               required
             >
+              <SelectTrigger id="rentalType">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
               {rentalTypes.map((type) => (
-                <option key={type.value} value={type.value}>
+                <SelectItem key={type.value} value={type.value}>
                   {type.label}
-                </option>
+                </SelectItem>
               ))}
-            </select>
+              </SelectContent>
+            </Select>
           </div>
 
           <div className="space-y-2">
@@ -326,22 +335,23 @@ export default function AddEquipmentPage() {
             <Label htmlFor="condition">
               Equipment condition <span className="text-destructive">*</span>
             </Label>
-            <select
+            <Select
               id="condition"
               name="condition"
-              className={selectClassName}
               defaultValue=""
               required
             >
-              <option value="" disabled>
-                Select a condition
-              </option>
+              <SelectTrigger id="condition">
+                <SelectValue placeholder="Select a condition" />
+              </SelectTrigger>
+              <SelectContent>
               {conditions.map((condition) => (
-                <option key={condition} value={condition}>
+                <SelectItem key={condition} value={condition}>
                   {condition}
-                </option>
+                </SelectItem>
               ))}
-            </select>
+              </SelectContent>
+            </Select>
           </div>
 
           <div className="space-y-2">

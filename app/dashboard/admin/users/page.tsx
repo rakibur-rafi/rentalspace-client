@@ -5,15 +5,19 @@ import { Search, Users } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import { toast } from "@/components/ui/toast"
 import { updateUserRole } from "@/lib/actions/user"
 import { getUsers, type AdminUser, type UserRole } from "@/lib/api/users"
 import { authClient } from "@/lib/auth-client"
 
 const roles: UserRole[] = ["customer", "owner", "admin"]
-
-const selectClassName =
-  "h-9 rounded-md border border-input bg-background px-3 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50"
 
 function getInitials(name?: string) {
   return (
@@ -224,24 +228,28 @@ export default function AdminUsersPage() {
                       {user.email}
                     </td>
                     <td className="px-5 py-3 text-right">
-                      <select
-                        aria-label={`Role for ${user.name || user.email}`}
-                        className={selectClassName}
+                      <Select
                         value={user.role}
                         disabled={updatingId === user._id}
-                        onChange={(event) =>
-                          void handleRoleChange(
-                            user,
-                            event.target.value as UserRole
-                          )
+                        onValueChange={(role) =>
+                          role &&
+                          void handleRoleChange(user, role as UserRole)
                         }
                       >
+                        <SelectTrigger
+                          aria-label={`Role for ${user.name || user.email}`}
+                          className="w-32"
+                        >
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
                         {roles.map((role) => (
-                          <option key={role} value={role}>
+                          <SelectItem key={role} value={role}>
                             {role}
-                          </option>
+                          </SelectItem>
                         ))}
-                      </select>
+                        </SelectContent>
+                      </Select>
                     </td>
                   </tr>
                 ))}

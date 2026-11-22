@@ -36,6 +36,28 @@ export const updateEquipments = async (
   return res.json()
 }
 
+export const updateEquipmentStatus = async (
+  id: string,
+  status: "active" | "pending" | "rejected" | "inactive",
+  token: string
+) => {
+  const res = await fetch(`${BASE_URL}/equipments/${id}`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ status }),
+  })
+
+  if (!res.ok) {
+    const result = await res.json().catch(() => null)
+    throw new Error(result?.message || "Failed to update equipment status")
+  }
+
+  return res.json()
+}
+
 export const deleteEquipments = async (id: string, token: string) => {
   const res = await fetch(`${BASE_URL}/equipments/my-equipments/${id}`, {
     method: "DELETE",

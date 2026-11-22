@@ -23,6 +23,13 @@ import {
 import { Button, buttonVariants } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import { toast } from "@/components/ui/toast"
 import { deleteEquipments, updateEquipments } from "@/lib/actions/equipments"
 import { uploadImage } from "@/lib/actions/image"
@@ -59,9 +66,6 @@ const categories = [
 const conditions = ["New", "Excellent", "Good", "Fair"]
 
 const rentalTypes = ["daily", "weekly", "monthly"]
-
-const selectClassName =
-  "h-9 w-full rounded-md border border-input bg-transparent px-2.5 py-1 text-sm shadow-xs outline-none transition-[color,box-shadow] focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 dark:bg-input/30"
 
 const textareaClassName =
   "min-h-24 w-full rounded-md border border-input bg-transparent px-2.5 py-2 text-sm shadow-xs outline-none transition-[color,box-shadow] focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 dark:bg-input/30"
@@ -494,21 +498,25 @@ export default function MyEquipmentPage() {
 
               <div className="space-y-2">
                 <Label htmlFor="edit-category">Category</Label>
-                <select
+                <Select
                   id="edit-category"
                   name="category"
                   defaultValue={editing.category}
-                  className={selectClassName}
                   required
                 >
+                  <SelectTrigger id="edit-category">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
                   {[...new Set([editing.category, ...categories])].map(
                     (category) => (
-                      <option key={category} value={category}>
+                      <SelectItem key={category} value={category}>
                         {category}
-                      </option>
+                      </SelectItem>
                     )
                   )}
-                </select>
+                  </SelectContent>
+                </Select>
               </div>
 
               <div className="space-y-2">
@@ -547,7 +555,7 @@ export default function MyEquipmentPage() {
 
               <div className="space-y-2">
                 <Label htmlFor="edit-rentalType">Rental type</Label>
-                <select
+                <Select
                   id="edit-rentalType"
                   name="rentalType"
                   defaultValue={
@@ -555,15 +563,19 @@ export default function MyEquipmentPage() {
                       ? editing.rentalType.toLowerCase()
                       : "daily"
                   }
-                  className={selectClassName}
                   required
                 >
+                  <SelectTrigger id="edit-rentalType">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
                   {rentalTypes.map((type) => (
-                    <option key={type} value={type}>
+                    <SelectItem key={type} value={type}>
                       {capitalize(type)}
-                    </option>
+                    </SelectItem>
                   ))}
-                </select>
+                  </SelectContent>
+                </Select>
               </div>
 
               <div className="space-y-2">
@@ -580,21 +592,25 @@ export default function MyEquipmentPage() {
 
               <div className="space-y-2">
                 <Label htmlFor="edit-condition">Equipment condition</Label>
-                <select
+                <Select
                   id="edit-condition"
                   name="condition"
                   defaultValue={editing.condition}
-                  className={selectClassName}
                   required
                 >
+                  <SelectTrigger id="edit-condition">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
                   {[...new Set([editing.condition, ...conditions])].map(
                     (condition) => (
-                      <option key={condition} value={condition}>
+                      <SelectItem key={condition} value={condition}>
                         {condition}
-                      </option>
+                      </SelectItem>
                     )
                   )}
-                </select>
+                  </SelectContent>
+                </Select>
               </div>
 
               <div className="space-y-2">

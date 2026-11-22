@@ -7,6 +7,13 @@ import { CalendarDays, Eye, Package, RotateCw } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import {
   getAllRentals,
   getCustomerRentals,
   getOwnerRentals,
@@ -273,8 +280,7 @@ export default function RentalsDashboard({ view }: { view: View }) {
                   </td>
                   <td className="px-4 py-3">
                     {view === "owner" ? (
-                      <select
-                        aria-label={`Update status for ${rental.equipmentName}`}
+                      <Select
                         value={
                           rentalStatuses.includes(
                             (rental.status?.toLowerCase() ??
@@ -284,20 +290,25 @@ export default function RentalsDashboard({ view }: { view: View }) {
                             : "pending"
                         }
                         disabled={updatingRentalId === rental._id}
-                        onChange={(event) =>
-                          handleStatusChange(
-                            rental,
-                            event.target.value as RentalStatus
-                          )
+                        onValueChange={(status) =>
+                          status &&
+                          handleStatusChange(rental, status as RentalStatus)
                         }
-                        className="h-9 rounded-lg border border-input bg-background px-2 text-sm capitalize disabled:opacity-50"
                       >
+                        <SelectTrigger
+                          aria-label={`Update status for ${rental.equipmentName}`}
+                          className="w-36 capitalize"
+                        >
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
                         {rentalStatuses.map((status) => (
-                          <option key={status} value={status}>
+                          <SelectItem key={status} value={status}>
                             {status}
-                          </option>
+                          </SelectItem>
                         ))}
-                      </select>
+                        </SelectContent>
+                      </Select>
                     ) : (
                       <span className="inline-flex rounded-full bg-muted px-2.5 py-1 text-xs font-medium capitalize">
                         {rental.status ?? "Pending"}
