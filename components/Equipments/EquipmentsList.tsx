@@ -131,8 +131,8 @@ export function EquipmentsList() {
 
   useEffect(() => {
     if (!session || (session.user.role ?? "").toLowerCase() !== "customer") {
-      setFavoriteIds(new Set())
-      return
+      const resetTimer = window.setTimeout(() => setFavoriteIds(new Set()), 0)
+      return () => window.clearTimeout(resetTimer)
     }
 
     let active = true

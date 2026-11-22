@@ -63,11 +63,11 @@ export default function EquipmentCard({
             <Package className="size-8" aria-hidden="true" />
           </span>
         )}
-        <span className="absolute top-3 left-3 rounded-full bg-background/90 px-2.5 py-1 text-xs font-medium backdrop-blur">
+        <span className="absolute top-3 left-3 rounded-full bg-sky-500/10 px-2.5 py-1 text-xs font-semibold text-sky-800 backdrop-blur dark:text-sky-200">
           {equipment.category}
         </span>
         <span
-          className={`absolute right-3 bottom-3 rounded-full px-2.5 py-1 text-xs font-medium ${available ? "bg-emerald-500/90 text-white" : "bg-background text-muted-foreground"}`}
+          className={`absolute right-3 bottom-3 rounded-full px-2.5 py-1 text-xs font-medium ${available ? "bg-emerald-600 text-white" : "bg-rose-500/10 text-rose-700 dark:text-rose-300"}`}
         >
           {available ? "Available" : "Out of stock"}
         </span>
@@ -80,10 +80,13 @@ export default function EquipmentCard({
             equipment.condition}
         </p>
         <p className="mt-2 flex items-center gap-1 text-xs text-muted-foreground">
-          <MapPin className="size-3.5 shrink-0" aria-hidden="true" />
+          <MapPin
+            className="size-3.5 shrink-0 text-sky-600 dark:text-sky-400"
+            aria-hidden="true"
+          />
           <span className="truncate">{equipment.location}</span>
         </p>
-        <p className="mt-3 text-sm font-semibold">
+        <p className="mt-3 text-sm font-semibold text-primary">
           {formatPrice(equipment.rentalPrice)}
           <span className="ml-1 text-xs font-normal text-muted-foreground">
             / {equipment.rentalType}

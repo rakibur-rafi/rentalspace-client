@@ -266,12 +266,12 @@ export default function CheckoutForm({
         />
       </div>
 
-      <div className="flex items-center justify-between border-t pt-4">
+      <div className="flex items-center justify-between rounded-xl border border-primary/15 bg-primary/5 p-4">
         <div>
           <p className="text-sm text-muted-foreground">
             Total ({quantity} × {formatPrice(rentalPrice)} / {rentalType})
           </p>
-          <p className="mt-1 text-2xl font-semibold tracking-tight">
+          <p className="mt-1 text-2xl font-semibold tracking-tight text-primary">
             {formatPrice(totalPrice)}
           </p>
         </div>

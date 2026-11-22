@@ -53,6 +53,16 @@ function capitalize(value?: string) {
   return value.charAt(0).toUpperCase() + value.slice(1)
 }
 
+function roleClasses(role?: string) {
+  if (role?.toLowerCase() === "admin") {
+    return "bg-violet-500/10 text-violet-700 dark:text-violet-300"
+  }
+  if (role?.toLowerCase() === "owner") {
+    return "bg-emerald-500/10 text-emerald-700 dark:text-emerald-300"
+  }
+  return "bg-sky-500/10 text-sky-700 dark:text-sky-300"
+}
+
 function formatDate(value?: string) {
   if (!value) return "Not set"
 
@@ -320,7 +330,9 @@ export default function ProfilePage() {
                 </p>
               </div>
 
-              <span className="inline-flex rounded-full bg-muted px-3 py-1 text-xs font-medium">
+              <span
+                className={`inline-flex rounded-full px-3 py-1 text-xs font-medium capitalize ${roleClasses(profile?.role ?? session?.user.role)}`}
+              >
                 {capitalize(profile?.role ?? session?.user.role)}
               </span>
             </div>

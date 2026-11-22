@@ -32,6 +32,14 @@ function getInitials(name?: string) {
   )
 }
 
+function roleTone(role: UserRole) {
+  if (role === "admin")
+    return "bg-violet-500/10 text-violet-700 dark:text-violet-300"
+  if (role === "owner")
+    return "bg-emerald-500/10 text-emerald-700 dark:text-emerald-300"
+  return "bg-sky-500/10 text-sky-700 dark:text-sky-300"
+}
+
 export default function AdminUsersPage() {
   const { data: session } = authClient.useSession()
   const [users, setUsers] = useState<AdminUser[]>([])
@@ -147,7 +155,7 @@ export default function AdminUsersPage() {
         </div>
         <div className="relative w-full sm:max-w-xs">
           <Search
-            className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
+            className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground"
             aria-hidden="true"
           />
           <Input
@@ -200,9 +208,7 @@ export default function AdminUsersPage() {
                 <tr>
                   <th className="px-5 py-3 font-medium">User</th>
                   <th className="px-5 py-3 font-medium">Email</th>
-                  <th className="px-5 py-3 text-left font-medium">
-                    Role
-                  </th>
+                  <th className="px-5 py-3 text-left font-medium">Role</th>
                 </tr>
               </thead>
               <tbody className="divide-y">
@@ -219,7 +225,9 @@ export default function AdminUsersPage() {
                             className="size-10 rounded-full border object-cover"
                           />
                         ) : (
-                          <span className="flex size-10 items-center justify-center rounded-full bg-muted text-xs font-semibold">
+                          <span
+                            className={`flex size-10 items-center justify-center rounded-full text-xs font-semibold ${roleTone(user.role)}`}
+                          >
                             {getInitials(user.name)}
                           </span>
                         )}
@@ -236,22 +244,21 @@ export default function AdminUsersPage() {
                         value={user.role}
                         disabled={updatingId === user._id}
                         onValueChange={(role) =>
-                          role &&
-                          void handleRoleChange(user, role as UserRole)
+                          role && void handleRoleChange(user, role as UserRole)
                         }
                       >
                         <SelectTrigger
                           aria-label={`Role for ${user.name || user.email}`}
-                          className="w-32"
+                          className={`w-32 capitalize ${roleTone(user.role)}`}
                         >
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                        {roles.map((role) => (
-                          <SelectItem key={role} value={role}>
-                            {role}
-                          </SelectItem>
-                        ))}
+                          {roles.map((role) => (
+                            <SelectItem key={role} value={role}>
+                              {role}
+                            </SelectItem>
+                          ))}
                         </SelectContent>
                       </Select>
                     </td>

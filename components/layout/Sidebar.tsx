@@ -46,7 +46,7 @@ const navItems: Record<
       label: "Favorites",
       icon: Heart,
     },
-    
+
     { href: "/dashboard/profile", label: "My Profile", icon: User },
   ],
   owner: [
@@ -220,8 +220,8 @@ export function Sidebar({ role }: { role?: string | null }) {
                     href={href}
                     onClick={() => setOpen(false)}
                     className={cn(
-                      "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground",
-                      active && "bg-muted text-foreground"
+                      "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-primary/5 hover:text-primary",
+                      active && "bg-primary/10 text-primary"
                     )}
                   >
                     <Icon className="size-4" aria-hidden="true" />

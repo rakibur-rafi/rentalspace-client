@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import Image from "next/image"
 import Link from "next/link"
 import {
   ArrowRight,
@@ -26,24 +27,28 @@ const quickActions = [
     title: "Find equipment",
     description: "Browse available gear for your next project.",
     icon: Search,
+    tone: "bg-sky-500/10 text-sky-700 dark:text-sky-300",
   },
   {
     href: "/dashboard/customer/rentals",
     title: "View my rentals",
     description: "Check booking details and delivery progress.",
     icon: CalendarCheck,
+    tone: "bg-emerald-500/10 text-emerald-700 dark:text-emerald-300",
   },
   {
     href: "/dashboard/customer/favorites",
     title: "Saved favorites",
     description: "Return to equipment you have saved.",
     icon: Heart,
+    tone: "bg-rose-500/10 text-rose-700 dark:text-rose-300",
   },
   {
     href: "/dashboard/profile",
     title: "Update profile",
     description: "Keep your contact and delivery details current.",
     icon: UserRound,
+    tone: "bg-violet-500/10 text-violet-700 dark:text-violet-300",
   },
 ]
 
@@ -52,17 +57,23 @@ function StatCard({
   value,
   detail,
   icon: Icon,
+  tone,
 }: {
   label: string
   value: string | number
   detail: string
   icon: typeof CalendarCheck
+  tone: string
 }) {
   return (
     <div className="rounded-2xl border bg-card p-5">
       <div className="flex items-center justify-between text-sm text-muted-foreground">
         {label}
-        <Icon className="size-4" aria-hidden="true" />
+        <span
+          className={`flex size-9 items-center justify-center rounded-xl ${tone}`}
+        >
+          <Icon className="size-4" aria-hidden="true" />
+        </span>
       </div>
       <p className="mt-4 text-3xl font-semibold tracking-tight">{value}</p>
       <p className="mt-1 text-sm text-muted-foreground">{detail}</p>
@@ -123,18 +134,21 @@ export default function CustomerDashboardHome() {
       value: loading ? "—" : bookingCount,
       detail: "All your equipment orders",
       icon: CalendarCheck,
+      tone: "bg-sky-500/10 text-sky-700 dark:text-sky-300",
     },
     {
       label: "Completed rentals",
       value: loading ? "—" : (analytics?.deliveredRent ?? 0),
       detail: "Equipment delivered",
       icon: PackageCheck,
+      tone: "bg-emerald-500/10 text-emerald-700 dark:text-emerald-300",
     },
     {
       label: "In delivery",
       value: loading ? "—" : (analytics?.onDeliveryRent ?? 0),
       detail: "On the way to you",
       icon: Truck,
+      tone: "bg-amber-500/10 text-amber-700 dark:text-amber-300",
     },
     {
       label: "Total spent",
@@ -143,26 +157,40 @@ export default function CustomerDashboardHome() {
         : `৳${(analytics?.totalSpent ?? 0).toLocaleString()}`,
       detail: "Across paid rentals",
       icon: CircleDollarSign,
+      tone: "bg-violet-500/10 text-violet-700 dark:text-violet-300",
     },
   ]
 
   return (
     <main className="mx-auto w-full max-w-7xl space-y-6">
-      <section className="rounded-3xl border bg-card p-6 sm:p-8">
-        <p className="text-sm font-medium text-primary">Customer dashboard</p>
-        <div className="mt-2 flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
-          <div>
-            <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">
-              Welcome back{user?.name ? `, ${user.name.split(" ")[0]}` : ""}
-            </h1>
-            <p className="mt-2 text-muted-foreground">
-              Your rentals and saved gear, all in one place.
-            </p>
+      <section className="relative isolate overflow-hidden rounded-3xl border bg-card p-6 shadow-sm shadow-primary/5 sm:p-8">
+        <div className="relative z-10 max-w-2xl">
+          <p className="text-sm font-medium text-primary">Customer dashboard</p>
+          <div className="mt-2 flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">
+                Welcome back{user?.name ? `, ${user.name.split(" ")[0]}` : ""}
+              </h1>
+              <p className="mt-2 text-muted-foreground">
+                Your rentals and saved gear, all in one place.
+              </p>
+            </div>
+            <div className="rounded-2xl bg-muted/60 px-4 py-3 sm:min-w-44">
+              <p className="text-xs text-muted-foreground">Member since</p>
+              <p className="mt-1 font-medium">{memberSince}</p>
+            </div>
           </div>
-          <div className="rounded-2xl bg-muted/60 px-4 py-3 sm:min-w-44">
-            <p className="text-xs text-muted-foreground">Member since</p>
-            <p className="mt-1 font-medium">{memberSince}</p>
-          </div>
+        </div>
+        <div className="pointer-events-none absolute inset-y-0 right-0 hidden w-[43%] overflow-hidden md:block">
+          <Image
+            src="/images/rentalspace-hero.jpg"
+            alt="Rental equipment ready for your next project"
+            fill
+            priority
+            sizes="(min-width: 1024px) 40vw, 35vw"
+            className="object-cover object-center"
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-card via-card/50 to-transparent" />
         </div>
       </section>
 
@@ -198,25 +226,31 @@ export default function CustomerDashboardHome() {
             </span>
           </div>
           <div className="mt-5 grid gap-3 sm:grid-cols-2">
-            {quickActions.map(({ href, title, description, icon: Icon }) => (
-              <Link
-                key={href}
-                href={href}
-                className="group rounded-xl border p-4 transition-colors hover:bg-muted/50"
-              >
-                <div className="flex items-start justify-between gap-3">
-                  <Icon className="size-5 text-primary" aria-hidden="true" />
-                  <ArrowRight
-                    className="size-4 text-muted-foreground transition-transform group-hover:translate-x-1"
-                    aria-hidden="true"
-                  />
-                </div>
-                <p className="mt-4 font-medium">{title}</p>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  {description}
-                </p>
-              </Link>
-            ))}
+            {quickActions.map(
+              ({ href, title, description, icon: Icon, tone }) => (
+                <Link
+                  key={href}
+                  href={href}
+                  className="group rounded-xl border p-4 transition-colors hover:bg-muted/50"
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <span
+                      className={`flex size-9 items-center justify-center rounded-xl ${tone}`}
+                    >
+                      <Icon className="size-4" aria-hidden="true" />
+                    </span>
+                    <ArrowRight
+                      className="size-4 text-muted-foreground transition-transform group-hover:translate-x-1"
+                      aria-hidden="true"
+                    />
+                  </div>
+                  <p className="mt-4 font-medium">{title}</p>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    {description}
+                  </p>
+                </Link>
+              )
+            )}
           </div>
         </div>
 

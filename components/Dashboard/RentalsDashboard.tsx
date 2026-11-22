@@ -56,6 +56,35 @@ function getEquipmentId(rental: Rental) {
   return id ? String(id) : ""
 }
 
+function rentalStatusClasses(status?: string) {
+  const normalized = status?.toLowerCase()
+  if (normalized === "delivered") {
+    return "bg-emerald-500/10 text-emerald-700 dark:text-emerald-300"
+  }
+  if (normalized === "on delivery") {
+    return "bg-sky-500/10 text-sky-700 dark:text-sky-300"
+  }
+  if (normalized === "rejected" || normalized === "cancelled") {
+    return "bg-rose-500/10 text-rose-700 dark:text-rose-300"
+  }
+  return "bg-amber-500/10 text-amber-700 dark:text-amber-300"
+}
+
+function paymentStatusClasses(status?: string) {
+  const normalized = status?.toLowerCase()
+  if (
+    ["paid", "succeeded", "complete", "completed"].includes(normalized ?? "")
+  ) {
+    return "bg-emerald-500/10 text-emerald-700 dark:text-emerald-300"
+  }
+  if (
+    ["failed", "cancelled", "canceled", "refunded"].includes(normalized ?? "")
+  ) {
+    return "bg-rose-500/10 text-rose-700 dark:text-rose-300"
+  }
+  return "bg-amber-500/10 text-amber-700 dark:text-amber-300"
+}
+
 export default function RentalsDashboard({ view }: { view: View }) {
   const { data: session } = authClient.useSession()
   const [rentals, setRentals] = useState<RentalRow[]>([])
@@ -281,7 +310,9 @@ export default function RentalsDashboard({ view }: { view: View }) {
                     {formatPrice(rental.totalPrice)}
                   </td>
                   <td className="px-4 py-3">
-                    <span className="inline-flex rounded-full bg-muted px-2.5 py-1 text-xs font-medium capitalize">
+                    <span
+                      className={`inline-flex rounded-full px-2.5 py-1 text-xs font-medium capitalize ${paymentStatusClasses(rental.paymentStatus)}`}
+                    >
                       {rental.paymentStatus || "—"}
                     </span>
                   </td>
@@ -304,7 +335,7 @@ export default function RentalsDashboard({ view }: { view: View }) {
                       >
                         <SelectTrigger
                           aria-label={`Update status for ${rental.equipmentName}`}
-                          className="w-36 capitalize"
+                          className={`w-36 capitalize ${rentalStatusClasses(rental.status)}`}
                         >
                           <SelectValue />
                         </SelectTrigger>
@@ -317,7 +348,9 @@ export default function RentalsDashboard({ view }: { view: View }) {
                         </SelectContent>
                       </Select>
                     ) : (
-                      <span className="inline-flex rounded-full bg-muted px-2.5 py-1 text-xs font-medium capitalize">
+                      <span
+                        className={`inline-flex rounded-full px-2.5 py-1 text-xs font-medium capitalize ${rentalStatusClasses(rental.status)}`}
+                      >
                         {rental.status ?? "Pending"}
                       </span>
                     )}

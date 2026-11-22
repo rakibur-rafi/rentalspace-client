@@ -43,6 +43,19 @@ function capitalize(value?: string) {
   return value.charAt(0).toUpperCase() + value.slice(1)
 }
 
+function statusColor(status?: string) {
+  if (status === "active") {
+    return "bg-emerald-500/10 text-emerald-700 dark:text-emerald-300"
+  }
+  if (status === "rejected") {
+    return "bg-rose-500/10 text-rose-700 dark:text-rose-300"
+  }
+  if (status === "pending") {
+    return "bg-amber-500/10 text-amber-700 dark:text-amber-300"
+  }
+  return "bg-muted text-muted-foreground"
+}
+
 export default function AdminEquipmentPage() {
   const [equipments, setEquipments] = useState<Equipment[]>([])
   const [loading, setLoading] = useState(true)
@@ -245,7 +258,9 @@ export default function AdminEquipmentPage() {
                       </span>
                     </td>
                     <td className="px-4 py-3">
-                      <span className="inline-flex rounded-full bg-muted px-2.5 py-1 text-xs font-medium">
+                      <span
+                        className={`inline-flex rounded-full px-2.5 py-1 text-xs font-medium ${statusColor(equipment.status || "pending")}`}
+                      >
                         {capitalize(equipment.status || "pending")}
                       </span>
                     </td>

@@ -108,7 +108,9 @@ export default function CustomerFavoritesPage() {
         </div>
       ) : favorites.length === 0 ? (
         <div className="flex flex-col items-center gap-3 rounded-2xl border bg-card px-5 py-16 text-center">
-          <Heart className="size-8 text-muted-foreground" aria-hidden="true" />
+          <span className="flex size-14 items-center justify-center rounded-2xl bg-rose-500/10 text-rose-600 dark:text-rose-300">
+            <Heart className="size-7" aria-hidden="true" />
+          </span>
           <div>
             <p className="font-medium">No favorites yet</p>
             <p className="mt-1 text-sm text-muted-foreground">
