@@ -1,11 +1,5 @@
-import React from 'react';
+import AnalyticsDashboard from "@/components/Dashboard/AnalyticsDashboard"
 
-const AdminAnalytics = () => {
-    return (
-        <div>
-            
-        </div>
-    );
-};
-
-export default AdminAnalytics;
+export default function AdminAnalyticsPage() {
+  return <AnalyticsDashboard role="admin" />
+}
