@@ -24,6 +24,7 @@ import { toast } from "@/components/ui/toast"
 import { createReview } from "@/lib/actions/reviews"
 import { getReviews, type Review } from "@/lib/api/reviews"
 import { authClient } from "@/lib/auth-client"
+import { Reveal } from "@/components/Home/Reveal"
 
 function initials(name?: string) {
   return (
@@ -179,8 +180,11 @@ export default function ReviewsSection() {
   }
 
   return (
-    <section className="mx-auto w-full max-w-7xl space-y-7 px-4 py-12 sm:px-6 lg:px-8 lg:py-16">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+    <section
+      id="review"
+      className="mx-auto w-full max-w-7xl space-y-7 px-4 py-12 sm:px-6 lg:px-8 lg:py-16"
+    >
+      <Reveal className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <p className="text-sm font-semibold text-primary">
             From our community
@@ -199,7 +203,7 @@ export default function ReviewsSection() {
         >
           Give review <ArrowRight className="size-4" aria-hidden="true" />
         </Button>
-      </div>
+      </Reveal>
 
       {error ? (
         <div className="flex flex-col items-center gap-3 rounded-2xl border border-rose-500/20 bg-rose-500/5 px-5 py-12 text-center">
@@ -224,30 +228,32 @@ export default function ReviewsSection() {
           ))}
         </div>
       ) : reviews.length ? (
-        <Carousel
-          opts={{ align: "start", loop: reviews.length > 4 }}
-          aria-label="Customer reviews"
-          className="px-1"
-        >
-          <CarouselContent className="-ml-4">
-            {reviews.map((review, index) => (
-              <CarouselItem
-                key={
-                  review._id ?? `${review.userEmail}-${review.date}-${index}`
-                }
-                className="pl-4 sm:basis-1/2 lg:basis-1/4"
-              >
-                <ReviewCard review={review} />
-              </CarouselItem>
-            ))}
-          </CarouselContent>
-          {reviews.length > 1 ? (
-            <div className="mt-5 flex justify-end gap-2">
-              <CarouselPrevious className="static inset-auto my-0 size-9 translate-y-0" />
-              <CarouselNext className="static inset-auto my-0 size-9 translate-y-0" />
-            </div>
-          ) : null}
-        </Carousel>
+        <Reveal>
+          <Carousel
+            opts={{ align: "start", loop: reviews.length > 4 }}
+            aria-label="Customer reviews"
+            className="px-1"
+          >
+            <CarouselContent className="-ml-4">
+              {reviews.map((review, index) => (
+                <CarouselItem
+                  key={
+                    review._id ?? `${review.userEmail}-${review.date}-${index}`
+                  }
+                  className="pl-4 sm:basis-1/2 lg:basis-1/4"
+                >
+                  <ReviewCard review={review} />
+                </CarouselItem>
+              ))}
+            </CarouselContent>
+            {reviews.length > 1 ? (
+              <div className="mt-5 flex justify-end gap-2">
+                <CarouselPrevious className="static inset-auto my-0 size-9 translate-y-0" />
+                <CarouselNext className="static inset-auto my-0 size-9 translate-y-0" />
+              </div>
+            ) : null}
+          </Carousel>
+        </Reveal>
       ) : (
         <div className="rounded-2xl border bg-card px-5 py-12 text-center">
           <span className="mx-auto flex size-12 items-center justify-center rounded-2xl bg-amber-500/10 text-amber-600 dark:text-amber-300">

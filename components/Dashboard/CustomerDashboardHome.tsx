@@ -255,7 +255,7 @@ export default function CustomerDashboardHome() {
         </div>
 
         <Link
-          href="/"
+          href="/#review"
           className="group flex min-h-64 flex-col justify-between rounded-2xl border bg-primary p-6 text-primary-foreground transition-opacity hover:opacity-95 sm:p-7"
         >
           <div className="flex size-11 items-center justify-center rounded-xl bg-primary-foreground/15">

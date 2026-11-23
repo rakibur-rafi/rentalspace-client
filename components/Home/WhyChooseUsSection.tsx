@@ -5,6 +5,7 @@ import {
   ShieldCheck,
   type LucideIcon,
 } from "lucide-react"
+import { Reveal } from "@/components/Home/Reveal"
 
 const benefits: {
   title: string
@@ -58,21 +59,20 @@ export default function WhyChooseUsSection() {
         </div>
 
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {benefits.map(({ title, description, icon: Icon, tone }) => (
-            <article
-              key={title}
-              className="rounded-2xl border bg-card p-5 shadow-sm shadow-primary/5 sm:p-6"
-            >
-              <span
-                className={`flex size-11 items-center justify-center rounded-xl ${tone}`}
-              >
-                <Icon className="size-5" aria-hidden="true" />
-              </span>
-              <h3 className="mt-5 font-semibold tracking-tight">{title}</h3>
-              <p className="mt-2 text-sm leading-6 text-muted-foreground">
-                {description}
-              </p>
-            </article>
+          {benefits.map(({ title, description, icon: Icon, tone }, index) => (
+            <Reveal key={title} delay={index * 0.07}>
+              <article className="h-full rounded-2xl border bg-card p-5 shadow-sm shadow-primary/5 sm:p-6">
+                <span
+                  className={`flex size-11 items-center justify-center rounded-xl ${tone}`}
+                >
+                  <Icon className="size-5" aria-hidden="true" />
+                </span>
+                <h3 className="mt-5 font-semibold tracking-tight">{title}</h3>
+                <p className="mt-2 text-sm leading-6 text-muted-foreground">
+                  {description}
+                </p>
+              </article>
+            </Reveal>
           ))}
         </div>
       </div>

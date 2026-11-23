@@ -4,6 +4,7 @@ import { ArrowUpRight, BadgeCheck, Star } from "lucide-react"
 
 import { buttonVariants } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
+import { Reveal } from "@/components/Home/Reveal"
 
 const avatars = [
   { src: "/avatars/avatar-1.jpg", alt: "RentalSpace customer" },
@@ -17,7 +18,7 @@ export function Hero() {
     <section className="bg-muted/30">
       <div className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 md:py-8 lg:px-8">
         <div className="grid gap-4 lg:grid-cols-[1.02fr_0.98fr]">
-          <div className="flex min-h-[540px] flex-col justify-between rounded-[2rem] border bg-card p-7 sm:p-10 lg:min-h-[650px] lg:p-12">
+          <Reveal className="flex min-h-[540px] flex-col justify-between rounded-[2rem] border bg-card p-7 sm:p-10 lg:min-h-[650px] lg:p-12">
             <div>
               <h1 className="text-4xl leading-[0.96] font-semibold tracking-[-0.05em] sm:text-5xl xl:text-6xl">
                 <span className="block">Rent the gear.</span>
@@ -27,7 +28,7 @@ export function Hero() {
 
               <p className="mt-6 max-w-md text-sm leading-6 text-muted-foreground sm:text-base">
                 From power tools to heavy machinery, find the right equipment
-                from trusted local vendors — ready when your project is.
+                from trusted local vendors - ready when your project is.
               </p>
 
               <div className="mt-8 flex items-center gap-3">
@@ -91,9 +92,13 @@ export function Hero() {
                 </div>
               </div>
             </div>
-          </div>
+          </Reveal>
 
-          <div className="relative min-h-[480px] overflow-hidden rounded-[2rem] bg-gradient-to-b from-zinc-200 via-zinc-100 to-sky-200 lg:min-h-[650px]">
+          <Reveal
+            delay={0.12}
+            distance={28}
+            className="relative min-h-[480px] overflow-hidden rounded-[2rem] bg-gradient-to-b from-zinc-200 via-zinc-100 to-sky-200 lg:min-h-[650px]"
+          >
             <Image
               src="/images/category-heavy-equipment.jpg"
               alt="Construction professional wearing safety gear"
@@ -110,7 +115,7 @@ export function Hero() {
               />
               Verified local vendors
             </div>
-          </div>
+          </Reveal>
         </div>
       </div>
     </section>

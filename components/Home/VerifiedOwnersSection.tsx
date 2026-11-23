@@ -13,6 +13,7 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel"
 import { getVerifiedOwners, type VerifiedOwner } from "@/lib/api/users"
+import { Reveal } from "@/components/Home/Reveal"
 
 const ownerTones = [
   "bg-sky-500/10 text-sky-700 dark:text-sky-300",
@@ -114,7 +115,7 @@ export default function VerifiedOwnersSection() {
   return (
     <section className="bg-muted/30">
       <div className="mx-auto w-full max-w-7xl space-y-6 px-4 py-12 sm:px-6 lg:px-8 lg:py-16">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <Reveal className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <p className="text-sm font-semibold text-primary">
               Trusted equipment partners
@@ -127,7 +128,7 @@ export default function VerifiedOwnersSection() {
               RentalSpace.
             </p>
           </div>
-        </div>
+        </Reveal>
 
         {error ? (
           <div className="flex flex-col items-center gap-3 rounded-2xl border border-rose-500/20 bg-rose-500/5 px-5 py-12 text-center">
@@ -155,27 +156,29 @@ export default function VerifiedOwnersSection() {
             ))}
           </div>
         ) : owners.length ? (
-          <Carousel
-            opts={{ align: "start", loop: owners.length > 4 }}
-            aria-label="Verified equipment owners"
-          >
-            <CarouselContent>
-              {owners.map((owner, index) => (
-                <CarouselItem
-                  key={owner._id ?? owner.id ?? `${owner.name}-${index}`}
-                  className="sm:basis-1/2 lg:basis-1/4"
-                >
-                  <OwnerCard owner={owner} index={index} />
-                </CarouselItem>
-              ))}
-            </CarouselContent>
-            {owners.length > 1 ? (
-              <div className="mt-5 flex justify-end gap-2">
-                <CarouselPrevious className="static inset-auto my-0 size-9 translate-y-0" />
-                <CarouselNext className="static inset-auto my-0 size-9 translate-y-0" />
-              </div>
-            ) : null}
-          </Carousel>
+          <Reveal>
+            <Carousel
+              opts={{ align: "start", loop: owners.length > 4 }}
+              aria-label="Verified equipment owners"
+            >
+              <CarouselContent>
+                {owners.map((owner, index) => (
+                  <CarouselItem
+                    key={owner._id ?? owner.id ?? `${owner.name}-${index}`}
+                    className="sm:basis-1/2 lg:basis-1/4"
+                  >
+                    <OwnerCard owner={owner} index={index} />
+                  </CarouselItem>
+                ))}
+              </CarouselContent>
+              {owners.length > 1 ? (
+                <div className="mt-5 flex justify-end gap-2">
+                  <CarouselPrevious className="static inset-auto my-0 size-9 translate-y-0" />
+                  <CarouselNext className="static inset-auto my-0 size-9 translate-y-0" />
+                </div>
+              ) : null}
+            </Carousel>
+          </Reveal>
         ) : (
           <div className="rounded-2xl border bg-card px-5 py-12 text-center">
             <span className="mx-auto flex size-12 items-center justify-center rounded-2xl bg-primary/10 text-primary">

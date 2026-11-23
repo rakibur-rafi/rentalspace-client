@@ -4,6 +4,7 @@ import {
   Search,
   type LucideIcon,
 } from "lucide-react"
+import { Reveal } from "@/components/Home/Reveal"
 
 const steps: {
   number: string
@@ -54,27 +55,28 @@ export default function HowItWorksSection() {
         </div>
 
         <div className="grid gap-4 md:grid-cols-3">
-          {steps.map(({ number, title, description, icon: Icon, tone }) => (
-            <article
-              key={number}
-              className="relative rounded-2xl border bg-card p-5 shadow-sm shadow-primary/5 sm:p-6"
-            >
-              <div className="flex items-center justify-between">
-                <span
-                  className={`flex size-11 items-center justify-center rounded-xl ${tone}`}
-                >
-                  <Icon className="size-5" aria-hidden="true" />
-                </span>
-                <span className="text-sm font-semibold text-muted-foreground/70 tabular-nums">
-                  {number}
-                </span>
-              </div>
-              <h3 className="mt-5 font-semibold tracking-tight">{title}</h3>
-              <p className="mt-2 text-sm leading-6 text-muted-foreground">
-                {description}
-              </p>
-            </article>
-          ))}
+          {steps.map(
+            ({ number, title, description, icon: Icon, tone }, index) => (
+              <Reveal key={number} delay={index * 0.08}>
+                <article className="relative h-full rounded-2xl border bg-card p-5 shadow-sm shadow-primary/5 sm:p-6">
+                  <div className="flex items-center justify-between">
+                    <span
+                      className={`flex size-11 items-center justify-center rounded-xl ${tone}`}
+                    >
+                      <Icon className="size-5" aria-hidden="true" />
+                    </span>
+                    <span className="text-sm font-semibold text-muted-foreground/70 tabular-nums">
+                      {number}
+                    </span>
+                  </div>
+                  <h3 className="mt-5 font-semibold tracking-tight">{title}</h3>
+                  <p className="mt-2 text-sm leading-6 text-muted-foreground">
+                    {description}
+                  </p>
+                </article>
+              </Reveal>
+            )
+          )}
         </div>
       </div>
     </section>

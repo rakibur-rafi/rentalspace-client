@@ -11,6 +11,7 @@ import EquipmentCard, {
 import { getFeaturedEquipments } from "@/lib/api/equipments"
 import { getFavourites } from "@/lib/api/favourites"
 import { authClient } from "@/lib/auth-client"
+import { Reveal } from "@/components/Home/Reveal"
 
 export default function FeaturedEquipmentSection() {
   const { data: session } = authClient.useSession()
@@ -127,13 +128,14 @@ export default function FeaturedEquipmentSection() {
         </div>
       ) : equipment.length ? (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {equipment.map((item) => (
-            <EquipmentCard
-              key={item._id}
-              equipment={item}
-              initiallySaved={savedIds.has(item._id)}
-              detailsHref={signedIn ? `/equipments/${item._id}` : "/login"}
-            />
+          {equipment.map((item, index) => (
+            <Reveal key={item._id} delay={index * 0.07}>
+              <EquipmentCard
+                equipment={item}
+                initiallySaved={savedIds.has(item._id)}
+                detailsHref={signedIn ? `/equipments/${item._id}` : "/login"}
+              />
+            </Reveal>
           ))}
         </div>
       ) : (

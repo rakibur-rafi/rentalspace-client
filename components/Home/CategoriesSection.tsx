@@ -7,6 +7,7 @@ import { ArrowRight, Layers3, RotateCw } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { getCategoryRecords, type Category } from "@/lib/api/categories"
+import { Reveal } from "@/components/Home/Reveal"
 
 const categoryTones = [
   "bg-sky-500/10 text-sky-700 dark:text-sky-300",
@@ -123,39 +124,40 @@ export default function CategoriesSection() {
         ) : categories.length ? (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {categories.map((category, index) => (
-              <Link
-                key={category.name}
-                href={`/equipments?category=${encodeURIComponent(category.name)}`}
-                className="group overflow-hidden rounded-2xl border bg-card shadow-sm shadow-primary/5 transition-colors hover:border-primary/30"
-              >
-                <div className="relative aspect-[16/9] overflow-hidden bg-muted">
-                  <Image
-                    src={getCategoryImage(category)}
-                    alt=""
-                    fill
-                    sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
-                    className="object-cover transition-transform duration-500 group-hover:scale-105"
-                  />
-                  <span
-                    className={`absolute top-4 left-4 inline-flex size-10 items-center justify-center rounded-xl backdrop-blur ${categoryTones[index % categoryTones.length]}`}
-                  >
-                    <Layers3 className="size-4" aria-hidden="true" />
-                  </span>
-                </div>
-                <div className="flex items-center justify-between gap-4 p-5">
-                  <div>
-                    <h3 className="font-semibold tracking-tight">
-                      {category.name}
-                    </h3>
-                    <p className="mt-1 text-sm text-muted-foreground">
-                      Explore available listings
-                    </p>
+              <Reveal key={category.name} delay={index * 0.07}>
+                <Link
+                  href={`/equipments?category=${encodeURIComponent(category.name)}`}
+                  className="group block overflow-hidden rounded-2xl border bg-card shadow-sm shadow-primary/5 transition-colors hover:border-primary/30"
+                >
+                  <div className="relative aspect-[16/9] overflow-hidden bg-muted">
+                    <Image
+                      src={getCategoryImage(category)}
+                      alt=""
+                      fill
+                      sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
+                      className="object-cover transition-transform duration-500 group-hover:scale-105"
+                    />
+                    <span
+                      className={`absolute top-4 left-4 inline-flex size-10 items-center justify-center rounded-xl backdrop-blur ${categoryTones[index % categoryTones.length]}`}
+                    >
+                      <Layers3 className="size-4" aria-hidden="true" />
+                    </span>
                   </div>
-                  <span className="flex size-9 shrink-0 items-center justify-center rounded-full border text-muted-foreground transition-colors group-hover:border-primary/30 group-hover:bg-primary/5 group-hover:text-primary">
-                    <ArrowRight className="size-4" aria-hidden="true" />
-                  </span>
-                </div>
-              </Link>
+                  <div className="flex items-center justify-between gap-4 p-5">
+                    <div>
+                      <h3 className="font-semibold tracking-tight">
+                        {category.name}
+                      </h3>
+                      <p className="mt-1 text-sm text-muted-foreground">
+                        Explore available listings
+                      </p>
+                    </div>
+                    <span className="flex size-9 shrink-0 items-center justify-center rounded-full border text-muted-foreground transition-colors group-hover:border-primary/30 group-hover:bg-primary/5 group-hover:text-primary">
+                      <ArrowRight className="size-4" aria-hidden="true" />
+                    </span>
+                  </div>
+                </Link>
+              </Reveal>
             ))}
           </div>
         ) : (
