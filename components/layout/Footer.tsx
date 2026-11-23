@@ -14,7 +14,11 @@ import { cn } from "@/lib/utils"
 const footerGroups = [
   {
     title: "Browse",
-    links: [{ label: "All equipment", href: "/equipments" }],
+    links: [
+      { label: "All equipment", href: "/equipments" },
+      { label: "About RentalSpace", href: "/about" },
+      { label: "Contact us", href: "/contact-us" },
+    ],
   },
   {
     title: "Your account",
@@ -26,7 +30,7 @@ const footerGroups = [
   {
     title: "For equipment owners",
     links: [
-      { label: "Contact us", href: "/" },
+      { label: "Become an owner", href: "/contact-us#owners" },
     ],
   },
 ]

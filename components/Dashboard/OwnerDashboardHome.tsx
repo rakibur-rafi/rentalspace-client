@@ -108,7 +108,7 @@ export default function OwnerDashboardHome() {
         </div>
         <div className="pointer-events-none absolute inset-y-0 right-0 hidden w-[43%] overflow-hidden md:block">
           <Image
-            src="/images/category-heavy-equipment.jpg"
+            src="/images/owner.jfif"
             alt="Heavy equipment available to rent"
             fill
             priority

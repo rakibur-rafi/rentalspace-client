@@ -52,13 +52,18 @@ function PublicNavbar() {
   const navLinks = [
     { href: "/", label: "Home" },
     { href: "/equipments", label: "All Equipment" },
+    { href: "/about", label: "About" },
+    { href: "/contact-us", label: "Contact us" },
 
   ]
 
   const userNavLinks = [
     { href: "/", label: "Home" },
-    { href: "/equipments", label: "All Equipment" },
     { href: `/dashboard/${role}`, label: "Dashboard" },
+    { href: "/equipments", label: "All Equipment" },
+    { href: "/about", label: "About" },
+    { href: "/contact-us", label: "Contact us" },
+  
   ]
 
   const primaryNavLinks = user ? userNavLinks : navLinks
